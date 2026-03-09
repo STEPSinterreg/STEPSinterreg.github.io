@@ -66,7 +66,7 @@ async function main() {
       "Missing target directory. Provide it as an argument or set PAGES_DIR.\n" +
         "Example:\n" +
         "  npm run build:pages\n" +
-        "  npm run deploy:pages:local -- \"C:/Users/Chris/Desktop/Files/Website/STEPS.github.io\"\n"
+        "  npm run deploy:pages:local -- \"C:/Users/Chris/Desktop/Files/Website/STEPSinterreg.github.io\"\n"
     );
     process.exit(2);
   }

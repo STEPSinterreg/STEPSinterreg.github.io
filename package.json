@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:pages": "tsc -b && vite build --base=/STEPS.github.io/ && node scripts/postbuild-pages.mjs",
-    "deploy:pages:local": "node scripts/deploy-ghpages.mjs",
+    "build:pages": "npm run build && node scripts/postbuild-pages.mjs",
+    "deploy:pages:local": "npm run build:pages && node scripts/deploy-ghpages.mjs",
     "lint": "eslint .",
     "test": "vitest run",
     "preview": "vite preview"
