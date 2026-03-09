@@ -2,7 +2,11 @@ import { useState } from "react";
 import { useLocale } from "../i18n/LocaleContext";
 import { translations } from "../i18n/translations";
 
-export default function LanguageToggle() {
+type LanguageToggleProps = {
+  buttonClass?: string;
+};
+
+export default function LanguageToggle({ buttonClass }: LanguageToggleProps) {
   const { locale, setLocale } = useLocale();
   const [open, setOpen] = useState(false);
   const t = translations[locale];
@@ -14,12 +18,13 @@ export default function LanguageToggle() {
   ];
 
   const current = options.find((o) => o.key === locale) ?? options[0];
+  const triggerClass = buttonClass ?? "inline-flex h-10 items-center gap-2 rounded-xl border border-slate-700 px-3 text-sm hover:bg-slate-900";
 
   return (
     <div className="relative">
       <button
         onClick={() => setOpen((s) => !s)}
-        className="flex items-center gap-2 rounded-xl border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900"
+        className={triggerClass}
         aria-haspopup="listbox"
         aria-expanded={open}
       >

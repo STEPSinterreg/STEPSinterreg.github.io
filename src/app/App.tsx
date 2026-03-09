@@ -34,11 +34,13 @@ export default function App() {
     setActionsMenuOpen(false);
   }, [location.pathname, location.search]);
 
+  const topBarButtonClass = "inline-flex h-10 items-center justify-center rounded-xl border px-3 text-sm hover:bg-slate-900";
+
   const headerActions = (
     <>
       {!isDashboard && !isHearingLossLevel && showHearingLossDevUnlock && (
         <button
-          className="rounded-xl border border-amber-700 px-3 py-2 text-sm hover:bg-slate-900"
+          className={`${topBarButtonClass} border-amber-700`}
           title={t["app.devUnlockAllTitle"]}
           onClick={() => {
             window.dispatchEvent(new CustomEvent("hearingLoss:unlockAll"));
@@ -51,7 +53,7 @@ export default function App() {
 
       {!isDashboard && !isHearingLossLevel && (
         <button
-          className="rounded-xl border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900"
+          className={`${topBarButtonClass} border-slate-700`}
           onClick={() => {
             navigate("/");
             setActionsMenuOpen(false);
@@ -63,7 +65,7 @@ export default function App() {
 
       {isHearingLossLevel && (
         <button
-          className="rounded-xl border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900"
+          className={`${topBarButtonClass} border-slate-700`}
           onClick={() => {
             navigate("/experiences/hearing-loss");
             setActionsMenuOpen(false);
@@ -90,6 +92,8 @@ export default function App() {
           </div>
 
           <div className="relative flex items-center gap-2 sm:gap-3">
+            <LanguageToggle buttonClass={`${topBarButtonClass} border-slate-700`} />
+
             {showHeaderActions && (
               <>
                 <div className="hidden items-center gap-2 sm:flex">{headerActions}</div>
@@ -97,7 +101,7 @@ export default function App() {
                 <div className="sm:hidden">
                   <button
                     type="button"
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 hover:bg-slate-900"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 hover:bg-slate-900"
                     aria-label={t["app.openActionsMenu"]}
                     aria-haspopup="menu"
                     aria-expanded={actionsMenuOpen}
@@ -123,8 +127,6 @@ export default function App() {
                 </div>
               </>
             )}
-
-            <LanguageToggle />
           </div>
         </div>
       </header>
