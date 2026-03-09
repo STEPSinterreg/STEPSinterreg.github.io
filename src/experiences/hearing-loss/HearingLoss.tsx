@@ -840,6 +840,8 @@ export default function HearingLoss() {
   const LEFT_MARKER_HALF = 6;
   const LEFT_MARKER_R = Math.SQRT2 * LEFT_MARKER_HALF;
   const MARKER_GAP_PX = 3;
+  const RIGHT_DRAG_HIT_R = RIGHT_MARKER_R + 16;
+  const LEFT_DRAG_HIT_R = 18;
 
   const shortenSegment = (
     x1: number,
@@ -1027,7 +1029,7 @@ export default function HearingLoss() {
     return (
       <svg
         viewBox={`0 0 ${svgW} ${svgH}`}
-        className={`h-auto w-full ${showAdjust ? "touch-none select-none" : ""}`}
+        className="h-auto w-full"
         role="img"
         aria-label={
           mode === "both"
@@ -1335,7 +1337,7 @@ export default function HearingLoss() {
                   onPointerDown={onAdjustPointerDown("R", p.freqHz)}
                   onKeyDown={onAdjustKeyDown("R", p.freqHz)}
                 >
-                  <circle cx={cx} cy={cy} r={RIGHT_MARKER_R + 10} fill="transparent" stroke="none" />
+                  <circle cx={cx} cy={cy} r={RIGHT_DRAG_HIT_R} fill="transparent" stroke="none" />
                   <circle
                     cx={cx}
                     cy={cy}
@@ -1404,7 +1406,7 @@ export default function HearingLoss() {
                 >
                   <line x1={cx - s} y1={cy - s} x2={cx + s} y2={cy + s} />
                   <line x1={cx - s} y1={cy + s} x2={cx + s} y2={cy - s} />
-                  <circle cx={cx} cy={cy} r={12} fill="transparent" stroke="none" />
+                  <circle cx={cx} cy={cy} r={LEFT_DRAG_HIT_R} fill="transparent" stroke="none" />
                 </g>
               );
             })}
