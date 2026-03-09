@@ -1,14 +1,16 @@
-import { useState } from "react";
+import type { RefObject } from "react";
 import { useLocale } from "../i18n/LocaleContext";
 import { translations } from "../i18n/translations";
 
 type LanguageToggleProps = {
   buttonClass?: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  containerRef?: RefObject<HTMLDivElement | null>;
 };
 
-export default function LanguageToggle({ buttonClass }: LanguageToggleProps) {
+export default function LanguageToggle({ buttonClass, open, onOpenChange, containerRef }: LanguageToggleProps) {
   const { locale, setLocale } = useLocale();
-  const [open, setOpen] = useState(false);
   const t = translations[locale];
 
   const options: { key: "da" | "de" | "en"; label: string; src: string }[] = [
@@ -21,9 +23,9 @@ export default function LanguageToggle({ buttonClass }: LanguageToggleProps) {
   const triggerClass = buttonClass ?? "inline-flex h-10 items-center gap-2 rounded-xl border border-slate-700 px-3 text-sm hover:bg-slate-900";
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <button
-        onClick={() => setOpen((s) => !s)}
+        onClick={() => onOpenChange(!open)}
         className={triggerClass}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -39,7 +41,7 @@ export default function LanguageToggle({ buttonClass }: LanguageToggleProps) {
                 <button
                   onClick={() => {
                     setLocale(opt.key);
-                    setOpen(false);
+                    onOpenChange(false);
                   }}
                   className={`flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-slate-800 ${
                     locale === opt.key ? "bg-slate-800" : ""
