@@ -112,8 +112,7 @@ type LevelStage = "listen" | "test" | "audiogram" | "correct";
 // This scales EQ/filter gains for loss profiles so HF/LF damping is obvious.
 const SEVERE_LOSS_GAIN_SCALE = 1.8;
 
-const BEFORE_TASKS_PDF_HREF = "/hearing-loss/tasks/Før.pdf";
-const AFTER_TASKS_PDF_HREF = "/hearing-loss/tasks/Efter.pdf";
+const TASKS_PDF_HREF = "/hearing-loss/tasks/Opgaver.pdf";
 
 const toSevereProfile = (profile: HearingProfile, opts?: { enabled?: boolean }): HearingProfile => {
   if (!opts?.enabled) return profile;
@@ -1429,18 +1428,11 @@ export default function HearingLoss() {
           <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5 sm:p-6">
             <div className="flex flex-col gap-3 sm:flex-row">
               <a
-                href={BEFORE_TASKS_PDF_HREF}
+                href={TASKS_PDF_HREF}
                 download
                 className="inline-flex w-full items-center justify-center rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
               >
-                {t["hearingLossExperience.tasks.downloadBefore"]}
-              </a>
-              <a
-                href={AFTER_TASKS_PDF_HREF}
-                download
-                className="inline-flex w-full items-center justify-center rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-              >
-                {t["hearingLossExperience.tasks.downloadAfter"]}
+                {t["hearingLossExperience.tasks.download"]}
               </a>
             </div>
           </section>
