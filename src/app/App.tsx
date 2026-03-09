@@ -116,10 +116,7 @@ export default function App() {
 
                   {actionsMenuOpen && (
                     <div className="absolute right-12 top-full z-20 mt-2 min-w-56 rounded-2xl border border-slate-800 bg-slate-950 p-2 shadow-2xl">
-                      <div className="px-2 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                        {t["app.actionsMenuTitle"]}
-                      </div>
-                      <div className="mt-1 flex flex-col gap-2" role="menu" aria-label={t["app.actionsMenuTitle"]}>
+                      <div className="flex flex-col gap-2" role="menu" aria-label={t["app.actionsMenuTitle"]}>
                         {headerActions}
                       </div>
                     </div>
