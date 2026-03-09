@@ -864,6 +864,8 @@ export default function HearingLoss() {
   };
 
   const [dragTarget, setDragTarget] = useState<{ ear: Ear; freqHz: number } | null>(null);
+  const dragPointerIdRef = useRef<number | null>(null);
+  const dragCaptureRef = useRef<SVGElement | null>(null);
 
   // Map draggable audiogram points to per-frequency EQ in dB.
   const correctionEqByEar = useMemo(() => {
@@ -932,12 +934,19 @@ export default function HearingLoss() {
   }, [correctionParams]);
 
   const onAdjustPointerDown = (adjustEar: Ear, freqHz: number) => (e: React.PointerEvent<SVGElement>) => {
-    (e.currentTarget as any).setPointerCapture?.(e.pointerId);
+    e.preventDefault();
+    e.stopPropagation();
+    const target = e.currentTarget;
+    target.setPointerCapture?.(e.pointerId);
+    dragPointerIdRef.current = e.pointerId;
+    dragCaptureRef.current = target;
     setDragTarget({ ear: adjustEar, freqHz });
   };
 
   const onPointPointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
     if (!dragTarget) return;
+    if (dragPointerIdRef.current !== null && e.pointerId !== dragPointerIdRef.current) return;
+    e.preventDefault();
     const svg = e.currentTarget;
     const rect = svg.getBoundingClientRect();
     const scaleY = svgH / rect.height;
@@ -954,8 +963,13 @@ export default function HearingLoss() {
 
   const onPointPointerUp = (e: React.PointerEvent<SVGSVGElement>) => {
     if (!dragTarget) return;
+    e.preventDefault();
     setDragTarget(null);
-    (e.currentTarget as SVGSVGElement).releasePointerCapture?.(e.pointerId);
+    if (dragCaptureRef.current && dragPointerIdRef.current !== null) {
+      dragCaptureRef.current.releasePointerCapture?.(dragPointerIdRef.current);
+    }
+    dragPointerIdRef.current = null;
+    dragCaptureRef.current = null;
   };
 
   const onAdjustKeyDown = (adjustEar: Ear, freqHz: number) => (e: React.KeyboardEvent<SVGElement>) => {
@@ -1013,7 +1027,7 @@ export default function HearingLoss() {
     return (
       <svg
         viewBox={`0 0 ${svgW} ${svgH}`}
-        className="h-auto w-full"
+        className={`h-auto w-full ${showAdjust ? "touch-none select-none" : ""}`}
         role="img"
         aria-label={
           mode === "both"
@@ -1310,6 +1324,8 @@ export default function HearingLoss() {
               return (
                 <g
                   key={`adj-r-${p.freqHz}`}
+                  className="touch-none"
+                  style={{ touchAction: "none" }}
                   tabIndex={0}
                   role="slider"
                   aria-label={`${t["hearingLossExperience.test.earRight"]} ${t["hearingLossExperience.audiogram.point"]} ${p.freqHz} ${t["common.hz"]}`}
@@ -1372,6 +1388,8 @@ export default function HearingLoss() {
               return (
                 <g
                   key={`adj-l-${p.freqHz}`}
+                  className="touch-none"
+                  style={{ touchAction: "none" }}
                   stroke="#60a5fa"
                   strokeWidth="3"
                   opacity="0.55"

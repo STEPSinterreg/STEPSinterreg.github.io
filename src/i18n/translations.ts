@@ -56,6 +56,8 @@ export const translations: Record<string, Record<string, string>> = {
 
     "app.devUnlockAllTitle": "Udviklerknap (testværktøj). Låser alle niveauer op.",
     "app.devUnlockAllButton": "Lås alle niveauer op (Udvikler)",
+    "app.openActionsMenu": "Åbn handlingsmenu",
+    "app.actionsMenuTitle": "Menu",
     "hearingLossExperience.title": "Høretabsoplevelse",
     "hearingLossExperience.progress": "Fremskridt",
     "hearingLossExperience.resume": "Fortsæt / Start",
@@ -276,6 +278,8 @@ export const translations: Record<string, Record<string, string>> = {
 
     "app.devUnlockAllTitle": "Entwickler-Button (Test-Tool). Schaltet alle Levels frei.",
     "app.devUnlockAllButton": "Alle Level freischalten (Entwickler)",
+    "app.openActionsMenu": "Aktionsmenü öffnen",
+    "app.actionsMenuTitle": "Menü",
     "hearingLossExperience.title": "Hörverlust-Erlebnis",
     "hearingLossExperience.progress": "Fortschritt",
     "hearingLossExperience.resume": "Fortsetzen / Start",
@@ -496,6 +500,8 @@ export const translations: Record<string, Record<string, string>> = {
 
     "app.devUnlockAllTitle": "Developer button (testing tool). Unlocks all levels.",
     "app.devUnlockAllButton": "Unlock all levels (Developer)",
+    "app.openActionsMenu": "Open actions menu",
+    "app.actionsMenuTitle": "Menu",
     "hearingLossExperience.title": "Hearing Loss Experience",
     "hearingLossExperience.progress": "Progress",
     "hearingLossExperience.resume": "Resume / Start",

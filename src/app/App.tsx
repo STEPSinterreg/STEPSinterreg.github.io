@@ -1,6 +1,6 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import LanguageToggle from "../components/LanguageToggle";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocale } from "../i18n/LocaleContext";
 import { translations } from "../i18n/translations";
 
@@ -9,6 +9,7 @@ import { translations } from "../i18n/translations";
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
   const isDashboard = location.pathname === "/";
   const isHearingLoss = location.pathname.startsWith("/experiences/hearing-loss");
   const search = new URLSearchParams(location.search);
@@ -29,10 +30,57 @@ export default function App() {
     link.href = href;
   }, [locale]);
 
+  useEffect(() => {
+    setActionsMenuOpen(false);
+  }, [location.pathname, location.search]);
+
+  const headerActions = (
+    <>
+      {!isDashboard && !isHearingLossLevel && showHearingLossDevUnlock && (
+        <button
+          className="rounded-xl border border-amber-700 px-3 py-2 text-sm hover:bg-slate-900"
+          title={t["app.devUnlockAllTitle"]}
+          onClick={() => {
+            window.dispatchEvent(new CustomEvent("hearingLoss:unlockAll"));
+            setActionsMenuOpen(false);
+          }}
+        >
+          {t["app.devUnlockAllButton"]}
+        </button>
+      )}
+
+      {!isDashboard && !isHearingLossLevel && (
+        <button
+          className="rounded-xl border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900"
+          onClick={() => {
+            navigate("/");
+            setActionsMenuOpen(false);
+          }}
+        >
+          {t.back_to_dashboard}
+        </button>
+      )}
+
+      {isHearingLossLevel && (
+        <button
+          className="rounded-xl border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900"
+          onClick={() => {
+            navigate("/experiences/hearing-loss");
+            setActionsMenuOpen(false);
+          }}
+        >
+          {t["hearingLossExperience.backToMainMenu"]}
+        </button>
+      )}
+    </>
+  );
+
+  const showHeaderActions = !isDashboard || isHearingLossLevel;
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <header className="sticky top-0 z-10 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-3">
             <img src={`/icons/${locale}.png`} alt={t["common.logoAlt"]} className="h-8 w-8 rounded-xl object-cover" />
             <div>
@@ -41,40 +89,42 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <LanguageToggle />
+          <div className="relative flex items-center gap-2 sm:gap-3">
+            {showHeaderActions && (
+              <>
+                <div className="hidden items-center gap-2 sm:flex">{headerActions}</div>
 
-            {!isDashboard && !isHearingLossLevel && (
-              <div className="flex items-center gap-2">
-                {showHearingLossDevUnlock && (
+                <div className="sm:hidden">
                   <button
-                    className="rounded-xl border border-amber-700 px-3 py-2 text-sm hover:bg-slate-900"
-                    title={t["app.devUnlockAllTitle"]}
-                    onClick={() => window.dispatchEvent(new CustomEvent("hearingLoss:unlockAll"))}
+                    type="button"
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 hover:bg-slate-900"
+                    aria-label={t["app.openActionsMenu"]}
+                    aria-haspopup="menu"
+                    aria-expanded={actionsMenuOpen}
+                    onClick={() => setActionsMenuOpen((open) => !open)}
                   >
-                    {t["app.devUnlockAllButton"]}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                      <line x1="4" y1="7" x2="20" y2="7" />
+                      <line x1="4" y1="12" x2="20" y2="12" />
+                      <line x1="4" y1="17" x2="20" y2="17" />
+                    </svg>
                   </button>
-                )}
 
-                <button
-                  className="rounded-xl border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900"
-                  onClick={() => navigate("/")}
-                >
-                  {t.back_to_dashboard}
-                </button>
-              </div>
+                  {actionsMenuOpen && (
+                    <div className="absolute right-12 top-full z-20 mt-2 min-w-56 rounded-2xl border border-slate-800 bg-slate-950 p-2 shadow-2xl">
+                      <div className="px-2 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                        {t["app.actionsMenuTitle"]}
+                      </div>
+                      <div className="mt-1 flex flex-col gap-2" role="menu" aria-label={t["app.actionsMenuTitle"]}>
+                        {headerActions}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
 
-            {isHearingLossLevel && (
-              <div className="flex items-center gap-2">
-                <button
-                  className="rounded-xl border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900"
-                  onClick={() => navigate("/experiences/hearing-loss")}
-                >
-                  {t["hearingLossExperience.backToMainMenu"]}
-                </button>
-              </div>
-            )}
+            <LanguageToggle />
           </div>
         </div>
       </header>
