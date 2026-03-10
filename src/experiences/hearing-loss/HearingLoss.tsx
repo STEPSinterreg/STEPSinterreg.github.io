@@ -934,6 +934,31 @@ export default function HearingLoss() {
     engine.setCorrection(correctionParams);
   }, [correctionParams]);
 
+  useEffect(() => {
+    if (!dragTarget) return;
+
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtmlTouchAction = html.style.touchAction;
+    const previousBodyTouchAction = body.style.touchAction;
+    const previousBodyOverflow = body.style.overflow;
+
+    html.style.touchAction = "none";
+    body.style.touchAction = "none";
+    body.style.overflow = "hidden";
+
+    return () => {
+      html.style.touchAction = previousHtmlTouchAction;
+      body.style.touchAction = previousBodyTouchAction;
+      body.style.overflow = previousBodyOverflow;
+    };
+  }, [dragTarget]);
+
+  const consumeTouchGesture = (e: React.TouchEvent<SVGElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   const onAdjustPointerDown = (adjustEar: Ear, freqHz: number) => (e: React.PointerEvent<SVGElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -1325,18 +1350,28 @@ export default function HearingLoss() {
               return (
                 <g
                   key={`adj-r-${p.freqHz}`}
-                  className="touch-none"
-                  style={{ touchAction: "none" }}
                   tabIndex={0}
                   role="slider"
                   aria-label={`${t["hearingLossExperience.test.earRight"]} ${t["hearingLossExperience.audiogram.point"]} ${p.freqHz} ${t["common.hz"]}`}
                   aria-valuemin={DBHL_MIN}
                   aria-valuemax={DBHL_MAX}
                   aria-valuenow={dbhl}
-                  onPointerDown={onAdjustPointerDown("R", p.freqHz)}
                   onKeyDown={onAdjustKeyDown("R", p.freqHz)}
                 >
-                  <circle cx={cx} cy={cy} r={RIGHT_DRAG_HIT_R} fill="transparent" stroke="none" />
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={RIGHT_DRAG_HIT_R}
+                    fill="transparent"
+                    stroke="none"
+                    pointerEvents="all"
+                    style={{ touchAction: "none" }}
+                    onPointerDown={onAdjustPointerDown("R", p.freqHz)}
+                    onTouchStart={consumeTouchGesture}
+                    onTouchMove={consumeTouchGesture}
+                    onTouchEnd={consumeTouchGesture}
+                    onTouchCancel={consumeTouchGesture}
+                  />
                   <circle
                     cx={cx}
                     cy={cy}
@@ -1389,8 +1424,6 @@ export default function HearingLoss() {
               return (
                 <g
                   key={`adj-l-${p.freqHz}`}
-                  className="touch-none"
-                  style={{ touchAction: "none" }}
                   stroke="#60a5fa"
                   strokeWidth="3"
                   opacity="0.55"
@@ -1400,12 +1433,24 @@ export default function HearingLoss() {
                   aria-valuemin={DBHL_MIN}
                   aria-valuemax={DBHL_MAX}
                   aria-valuenow={dbhl}
-                  onPointerDown={onAdjustPointerDown("L", p.freqHz)}
                   onKeyDown={onAdjustKeyDown("L", p.freqHz)}
                 >
                   <line x1={cx - s} y1={cy - s} x2={cx + s} y2={cy + s} />
                   <line x1={cx - s} y1={cy + s} x2={cx + s} y2={cy - s} />
-                  <circle cx={cx} cy={cy} r={LEFT_DRAG_HIT_R} fill="transparent" stroke="none" />
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={LEFT_DRAG_HIT_R}
+                    fill="transparent"
+                    stroke="none"
+                    pointerEvents="all"
+                    style={{ touchAction: "none" }}
+                    onPointerDown={onAdjustPointerDown("L", p.freqHz)}
+                    onTouchStart={consumeTouchGesture}
+                    onTouchMove={consumeTouchGesture}
+                    onTouchEnd={consumeTouchGesture}
+                    onTouchCancel={consumeTouchGesture}
+                  />
                 </g>
               );
             })}
