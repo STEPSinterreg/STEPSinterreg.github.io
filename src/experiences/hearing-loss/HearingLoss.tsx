@@ -1053,16 +1053,21 @@ export default function HearingLoss() {
     return (
       <svg
         viewBox={`0 0 ${svgW} ${svgH}`}
-        className="h-auto w-full"
+        className={`h-auto w-full ${showAdjust ? "touch-none select-none" : ""}`}
         role="img"
         aria-label={
           mode === "both"
             ? t["hearingLossExperience.audiogram.aria"]
             : `${t["hearingLossExperience.audiogram.aria"]} ${mode === "R" ? t["hearingLossExperience.test.earRight"] : t["hearingLossExperience.test.earLeft"]}`
         }
+        style={showAdjust ? { touchAction: "none" } : undefined}
         onPointerMove={onPointPointerMove}
         onPointerUp={onPointPointerUp}
         onPointerCancel={onPointPointerUp}
+        onTouchStart={showAdjust ? consumeTouchGesture : undefined}
+        onTouchMove={showAdjust ? consumeTouchGesture : undefined}
+        onTouchEnd={showAdjust ? consumeTouchGesture : undefined}
+        onTouchCancel={showAdjust ? consumeTouchGesture : undefined}
       >
         {/* Grid + left axis labels (approx. dB HL) */}
         {DBHL_TICKS.map((db) => {
