@@ -207,7 +207,7 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.audiogram.scale.moderate": "Moderat",
     "hearingLossExperience.audiogram.scale.moderatelySevere": "Moderat-svær",
     "hearingLossExperience.audiogram.scale.severe": "Svær",
-    "hearingLossExperience.audiogram.scale.profound": "Profound",
+    "hearingLossExperience.audiogram.scale.profound": "Kraftig",
 
     "hearingLossExperience.proceedToCorrection": "Prøv at korrigere",
 

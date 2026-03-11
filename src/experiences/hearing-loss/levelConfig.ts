@@ -17,15 +17,11 @@
 export const HIDE_HEARING_LOSS_PROFILE_LABELS = true;
 
 export const HEARING_LOSS_LEVELS_ENABLED: Record<string, boolean> = {
+  // Enabled currently
   intro: true,
-  // High-frequency loss
-  hf_sloping_age: true,
-
-  // Low-frequency loss
-  low_frequency_loss: true,
-
-  // Full loss
-  deafness: true,
+  hf_sloping_age: true, // High-frequency loss
+  low_frequency_loss: true, // Low-frequency loss
+  deafness: true, // Full loss
 
   // Disabled by default (kept for future builds)
   notch_4khz: false,
