@@ -277,7 +277,8 @@ export default function HearingLoss() {
   };
 
   const activeMeta = levels[levelIndex] ?? levels[0]!;
-  const shouldHideProfileLabels = HIDE_HEARING_LOSS_PROFILE_LABELS && activeMeta.id !== "intro";
+  const isActiveLevelCompleted = completedLevels.includes(activeLevel);
+  const shouldHideProfileLabels = HIDE_HEARING_LOSS_PROFILE_LABELS && activeMeta.id !== "intro" && !isActiveLevelCompleted;
   const visibleLevelTitle = shouldHideProfileLabels ? t["hearingLossExperience.level.hidden.title"] : t[activeMeta.titleKey];
   const visibleLevelSubtitle = shouldHideProfileLabels ? t["hearingLossExperience.level.hidden.subtitle"] : t[activeMeta.subtitleKey];
 
@@ -1509,7 +1510,7 @@ export default function HearingLoss() {
                     .map((lvl) => {
                       const locked = isLocked(lvl.id);
                       const completed = completedLevels.includes(lvl.id);
-                      const hideLabels = HIDE_HEARING_LOSS_PROFILE_LABELS;
+                      const hideLabels = HIDE_HEARING_LOSS_PROFILE_LABELS && !completed;
                       const title = hideLabels ? t["hearingLossExperience.level.hidden.title"] : t[lvl.titleKey];
                       const subtitle = hideLabels ? t["hearingLossExperience.level.hidden.subtitle"] : t[lvl.subtitleKey];
                       return (
