@@ -10,9 +10,9 @@ export default function ExperienceCard({ exp }: { exp: Experience }) {
   const t = translations[locale];
 
   const statusLabel: Record<string, string> = {
-    prototype: t.status_prototype,
-    beta: t.status_beta,
-    live: t.status_live,
+    prototype: t["status_prototype"],
+    beta: t["status_beta"],
+    live: t["status_live"],
   };
 
   return (
@@ -47,7 +47,7 @@ export default function ExperienceCard({ exp }: { exp: Experience }) {
       </div>
 
       <div className="mt-4 text-sm text-slate-300 underline-offset-4 group-hover:underline">
-        {t.open_experience}
+        {t["open_experience"]}
       </div>
     </button>
   );

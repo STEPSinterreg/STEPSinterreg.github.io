@@ -79,7 +79,7 @@ export default function App() {
             setActionsMenuOpen(false);
           }}
         >
-          {t.back_to_dashboard}
+          {t["back_to_dashboard"]}
         </button>
       )}
 
@@ -106,8 +106,8 @@ export default function App() {
           <div className="flex items-center gap-3">
             <img src={`/icons/${locale}.png`} alt={t["common.logoAlt"]} className="h-8 w-8 rounded-xl object-cover" />
             <div>
-              <div className="text-sm font-semibold leading-4">{t.app_name}</div>
-              <div className="text-xs text-slate-400">{t.app_subtitle}</div>
+              <div className="text-sm font-semibold leading-4">{t["app_name"]}</div>
+              <div className="text-xs text-slate-400">{t["app_subtitle"]}</div>
             </div>
           </div>
 
@@ -172,7 +172,7 @@ export default function App() {
                               setActionsMenuOpen(false);
                             }}
                           >
-                            <span className="flex-1">{t.back_to_dashboard}</span>
+                            <span className="flex-1">{t["back_to_dashboard"]}</span>
                           </button>
                         )}
 

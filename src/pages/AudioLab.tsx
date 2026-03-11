@@ -42,7 +42,7 @@ export default function AudioLab() {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Failed to load audio", err);
-      alert(format(t.audio_lab_load_error, { url }));
+      alert(format(t["audio_lab_load_error"], { url }));
     }
   };
 
@@ -89,19 +89,19 @@ export default function AudioLab() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold">{t.audio_lab_title}</h1>
-      <p className="text-sm text-slate-400">{t.audio_lab_desc}</p>
+      <h1 className="text-2xl font-semibold">{t["audio_lab_title"]}</h1>
+      <p className="text-sm text-slate-400">{t["audio_lab_desc"]}</p>
 
       <div className="mt-4 flex flex-col gap-3 max-w-lg">
         <div className="flex gap-2">
-          <button className="rounded bg-slate-700 px-3 py-2" onClick={handlePlay}>{t.play}</button>
-          <button className="rounded bg-slate-700 px-3 py-2" onClick={handlePause}>{t.pause}</button>
-          <button className="rounded bg-slate-700 px-3 py-2" onClick={handleStop}>{t.stop}</button>
-          <button className="rounded bg-slate-700 px-3 py-2" onClick={handleLoad}>{t.load}</button>
+          <button className="rounded bg-slate-700 px-3 py-2" onClick={handlePlay}>{t["play"]}</button>
+          <button className="rounded bg-slate-700 px-3 py-2" onClick={handlePause}>{t["pause"]}</button>
+          <button className="rounded bg-slate-700 px-3 py-2" onClick={handleStop}>{t["stop"]}</button>
+          <button className="rounded bg-slate-700 px-3 py-2" onClick={handleLoad}>{t["load"]}</button>
         </div>
 
         <div className="flex gap-2 items-center">
-          <label className="text-sm">{t.file_label}</label>
+          <label className="text-sm">{t["file_label"]}</label>
           <select value={fileIndex} onChange={handleFileSelect} className="rounded bg-slate-800 px-2 py-1">
             {AUDIO_FILES.map((f, i) => (
               <option key={f} value={i}>{f}</option>
@@ -110,22 +110,22 @@ export default function AudioLab() {
         </div>
 
         <div className="flex gap-2 items-center">
-          <label className="text-sm">{t.profile_label}</label>
+          <label className="text-sm">{t["profile_label"]}</label>
           <select value={profileIndex} onChange={handleSelect} className="rounded bg-slate-800 px-2 py-1">
             {profiles.map((p, i) => (
               <option key={p.id} value={i}>{p.name}</option>
             ))}
           </select>
-          <button className="rounded bg-slate-700 px-3 py-2" onClick={handleRandom}>{t.random_profile}</button>
+          <button className="rounded bg-slate-700 px-3 py-2" onClick={handleRandom}>{t["random_profile"]}</button>
         </div>
 
         <div>
-          <div className="text-sm font-medium">{t.active_profile}</div>
+          <div className="text-sm font-medium">{t["active_profile"]}</div>
           <div className="text-sm text-slate-300">{active.name} — {active.description}</div>
         </div>
 
         <div>
-          <label className="text-sm">{t.intensity_label}: {intensity}%</label>
+          <label className="text-sm">{t["intensity_label"]}: {intensity}%</label>
           <input type="range" min={0} max={100} value={intensity} onChange={handleIntensity} className="w-full" />
         </div>
 

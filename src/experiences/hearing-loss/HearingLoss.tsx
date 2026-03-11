@@ -1594,9 +1594,9 @@ export default function HearingLoss() {
                       ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
                       src={audioSrcByKind[kind]}
                       loop={AUDIO_LOOP[kind]}
-                      playLabel={t.play}
-                      pauseLabel={t.pause}
-                      stopLabel={t.stop}
+                      playLabel={t["play"]}
+                      pauseLabel={t["pause"]}
+                      stopLabel={t["stop"]}
                       onSeekStart={() => pauseAllAudio()}
                       onPlay={() => void playAudio(kind)}
                       onPause={() => pauseAudio(kind)}
@@ -1829,9 +1829,9 @@ export default function HearingLoss() {
                               ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
                               src={audioSrcByKind[kind]}
                               loop={AUDIO_LOOP[kind]}
-                              playLabel={t.play}
-                              pauseLabel={t.pause}
-                              stopLabel={t.stop}
+                              playLabel={t["play"]}
+                              pauseLabel={t["pause"]}
+                              stopLabel={t["stop"]}
                               onSeekStart={() => pauseAllAudio()}
                               onPlay={() => void playAudio(kind)}
                               onPause={() => pauseAudio(kind)}
