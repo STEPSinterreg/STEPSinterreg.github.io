@@ -113,6 +113,7 @@ type LevelStage = "listen" | "test" | "audiogram" | "correct";
 const SEVERE_LOSS_GAIN_SCALE = 1.8;
 
 const TASKS_PDF_HREF = "/hearing-loss/tasks/Opgaver.pdf";
+const TASKS_DOCX_HREF = "/hearing-loss/tasks/Opgaver.docx";
 
 const toSevereProfile = (profile: HearingProfile, opts?: { enabled?: boolean }): HearingProfile => {
   if (!opts?.enabled) return profile;
@@ -1486,7 +1487,14 @@ export default function HearingLoss() {
                 download
                 className="inline-flex w-full items-center justify-center rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
               >
-                {t["hearingLossExperience.tasks.download"]}
+                {t["hearingLossExperience.tasks.downloadPdf"]}
+              </a>
+              <a
+                href={TASKS_DOCX_HREF}
+                download
+                className="inline-flex w-full items-center justify-center rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+              >
+                {t["hearingLossExperience.tasks.downloadDocx"]}
               </a>
             </div>
           </section>

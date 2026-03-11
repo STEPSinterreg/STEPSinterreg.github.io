@@ -116,7 +116,8 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.menu.introCta": "Start introduktion",
     "hearingLossExperience.menu.levelsTitle": "Niveauer",
 
-    "hearingLossExperience.tasks.download": "Hent opgaver",
+    "hearingLossExperience.tasks.downloadPdf": "Hent Opgaver (pdf)",
+    "hearingLossExperience.tasks.downloadDocx": "Hent Opgaver (docx)",
 
     "hearingLossExperience.level.intro.title": "Introduktion",
     "hearingLossExperience.level.intro.subtitle": "Prøv en audiometri-test uden filter",
@@ -339,7 +340,8 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.menu.introCta": "Einführung starten",
     "hearingLossExperience.menu.levelsTitle": "Levels",
 
-    "hearingLossExperience.tasks.download": "Aufgaben herunterladen",
+    "hearingLossExperience.tasks.downloadPdf": "Aufgaben herunterladen (PDF)",
+    "hearingLossExperience.tasks.downloadDocx": "Aufgaben herunterladen (DOCX)",
 
     "hearingLossExperience.level.intro.title": "Einführung",
     "hearingLossExperience.level.intro.subtitle": "Audiometrie-Test ohne Filter",
@@ -562,7 +564,8 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.menu.introCta": "Start introduction",
     "hearingLossExperience.menu.levelsTitle": "Levels",
 
-    "hearingLossExperience.tasks.download": "Download tasks",
+    "hearingLossExperience.tasks.downloadPdf": "Download tasks (PDF)",
+    "hearingLossExperience.tasks.downloadDocx": "Download tasks (DOCX)",
 
     "hearingLossExperience.level.intro.title": "Introduction",
     "hearingLossExperience.level.intro.subtitle": "Try an audiometry test with no filter",
