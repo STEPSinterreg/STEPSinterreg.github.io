@@ -12,6 +12,10 @@
 // Notes:
 // - "intro" is always enabled.
 
+// When enabled, UI labels for hearing-loss profiles are replaced with generic
+// placeholder copy so learners must infer the profile from the audio/task.
+export const HIDE_HEARING_LOSS_PROFILE_LABELS = true;
+
 export const HEARING_LOSS_LEVELS_ENABLED: Record<string, boolean> = {
   intro: true,
   // High-frequency loss

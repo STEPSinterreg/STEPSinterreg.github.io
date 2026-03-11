@@ -16,7 +16,7 @@ import {
   levelToGainForFrequency,
   LOUDNESS_START_LEVEL,
 } from "./audiometry/loudness";
-import { isHearingLossLevelEnabled } from "./levelConfig";
+import { HIDE_HEARING_LOSS_PROFILE_LABELS, isHearingLossLevelEnabled } from "./levelConfig";
 
 const LEVELS = [
   {
@@ -277,6 +277,9 @@ export default function HearingLoss() {
   };
 
   const activeMeta = levels[levelIndex] ?? levels[0]!;
+  const shouldHideProfileLabels = HIDE_HEARING_LOSS_PROFILE_LABELS && activeMeta.id !== "intro";
+  const visibleLevelTitle = shouldHideProfileLabels ? t["hearingLossExperience.level.hidden.title"] : t[activeMeta.titleKey];
+  const visibleLevelSubtitle = shouldHideProfileLabels ? t["hearingLossExperience.level.hidden.subtitle"] : t[activeMeta.subtitleKey];
 
   // Deterministic seed: keep profile sampling stable across reloads/sessions.
   const sessionSeedRef = useRef<number>(hashStringToSeed("hearingLossExperience"));
@@ -1506,6 +1509,9 @@ export default function HearingLoss() {
                     .map((lvl) => {
                       const locked = isLocked(lvl.id);
                       const completed = completedLevels.includes(lvl.id);
+                      const hideLabels = HIDE_HEARING_LOSS_PROFILE_LABELS;
+                      const title = hideLabels ? t["hearingLossExperience.level.hidden.title"] : t[lvl.titleKey];
+                      const subtitle = hideLabels ? t["hearingLossExperience.level.hidden.subtitle"] : t[lvl.subtitleKey];
                       return (
                         <button
                           key={lvl.id}
@@ -1520,8 +1526,8 @@ export default function HearingLoss() {
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div>
-                              <div className="font-semibold">{t[lvl.titleKey]}</div>
-                              <div className="mt-0.5 text-xs text-slate-400">{t[lvl.subtitleKey]}</div>
+                              <div className="font-semibold">{title}</div>
+                              <div className="mt-0.5 text-xs text-slate-400">{subtitle}</div>
                             </div>
                             {completed && (
                               <span className="rounded-full border border-slate-700 px-2 py-1 text-xs text-slate-300">
@@ -1548,8 +1554,8 @@ export default function HearingLoss() {
           <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5 sm:p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{t[activeMeta.titleKey]}</h1>
-                <p className="mt-1 text-sm text-slate-400">{t[activeMeta.subtitleKey]}</p>
+                <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{visibleLevelTitle}</h1>
+                <p className="mt-1 text-sm text-slate-400">{visibleLevelSubtitle}</p>
               </div>
 
               <div className="flex items-center gap-2">

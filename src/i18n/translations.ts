@@ -120,6 +120,8 @@ export const translations: Record<string, Record<string, string>> = {
 
     "hearingLossExperience.level.intro.title": "Introduktion",
     "hearingLossExperience.level.intro.subtitle": "Prøv en audiometri-test uden filter",
+    "hearingLossExperience.level.hidden.title": "Skjult høreprofil",
+    "hearingLossExperience.level.hidden.subtitle": "Lyt dig frem til hvilken type høretab dette niveau simulerer",
     // Note: previously included qualifier "(alder)".
     "hearingLossExperience.level.hf_sloping_age.title": "Højfrekvent skrånende tab",
     "hearingLossExperience.level.hf_sloping_age.subtitle": "Høje frekvenser dæmpes gradvist",
@@ -342,6 +344,8 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.level.intro.title": "Einführung",
     "hearingLossExperience.level.intro.subtitle": "Audiometrie-Test ohne Filter",
     // Note: previously included qualifier "(altersbedingt)".
+    "hearingLossExperience.level.hidden.title": "Verborgene Hörprofil-Aufgabe",
+    "hearingLossExperience.level.hidden.subtitle": "Höre genau hin und ermittle, welchen Hörverlust dieses Level simuliert",
     "hearingLossExperience.level.hf_sloping_age.title": "Hochfrequenz-Abfall",
     "hearingLossExperience.level.hf_sloping_age.subtitle": "Hohe Frequenzen werden zunehmend gedämpft",
     "hearingLossExperience.level.notch_4khz.title": "4-kHz-Notch (Lärmschaden)",
@@ -562,6 +566,8 @@ export const translations: Record<string, Record<string, string>> = {
 
     "hearingLossExperience.level.intro.title": "Introduction",
     "hearingLossExperience.level.intro.subtitle": "Try an audiometry test with no filter",
+    "hearingLossExperience.level.hidden.title": "Hidden hearing profile",
+    "hearingLossExperience.level.hidden.subtitle": "Listen closely and identify which hearing loss this level simulates",
     // Note: previously included qualifier "(age-related)".
     "hearingLossExperience.level.hf_sloping_age.title": "High-frequency sloping loss",
     "hearingLossExperience.level.hf_sloping_age.subtitle": "High frequencies roll off gradually",
