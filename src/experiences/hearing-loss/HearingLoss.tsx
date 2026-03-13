@@ -939,31 +939,6 @@ export default function HearingLoss() {
     engine.setCorrection(correctionParams);
   }, [correctionParams]);
 
-  useEffect(() => {
-    if (!dragTarget) return;
-
-    const html = document.documentElement;
-    const body = document.body;
-    const previousHtmlTouchAction = html.style.touchAction;
-    const previousBodyTouchAction = body.style.touchAction;
-    const previousBodyOverflow = body.style.overflow;
-
-    html.style.touchAction = "none";
-    body.style.touchAction = "none";
-    body.style.overflow = "hidden";
-
-    return () => {
-      html.style.touchAction = previousHtmlTouchAction;
-      body.style.touchAction = previousBodyTouchAction;
-      body.style.overflow = previousBodyOverflow;
-    };
-  }, [dragTarget]);
-
-  const consumeTouchGesture = (e: React.TouchEvent<SVGElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
   const onAdjustPointerDown = (adjustEar: Ear, freqHz: number) => (e: React.PointerEvent<SVGElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -1058,21 +1033,16 @@ export default function HearingLoss() {
     return (
       <svg
         viewBox={`0 0 ${svgW} ${svgH}`}
-        className={`h-auto w-full ${showAdjust ? "touch-none select-none" : ""}`}
+        className="h-auto w-full"
         role="img"
         aria-label={
           mode === "both"
             ? t["hearingLossExperience.audiogram.aria"]
             : `${t["hearingLossExperience.audiogram.aria"]} ${mode === "R" ? t["hearingLossExperience.test.earRight"] : t["hearingLossExperience.test.earLeft"]}`
         }
-        style={showAdjust ? { touchAction: "none" } : undefined}
         onPointerMove={onPointPointerMove}
         onPointerUp={onPointPointerUp}
         onPointerCancel={onPointPointerUp}
-        onTouchStart={showAdjust ? consumeTouchGesture : undefined}
-        onTouchMove={showAdjust ? consumeTouchGesture : undefined}
-        onTouchEnd={showAdjust ? consumeTouchGesture : undefined}
-        onTouchCancel={showAdjust ? consumeTouchGesture : undefined}
       >
         {/* Grid + left axis labels (approx. dB HL) */}
         {DBHL_TICKS.map((db) => {
@@ -1371,25 +1341,22 @@ export default function HearingLoss() {
                   <circle
                     cx={cx}
                     cy={cy}
+                    r={RIGHT_MARKER_R + 2}
+                    fill="transparent"
+                    stroke="#f87171"
+                    strokeWidth="3"
+                    opacity="0.55"
+                    pointerEvents="none"
+                  />
+                  <circle
+                    cx={cx}
+                    cy={cy}
                     r={RIGHT_DRAG_HIT_R}
                     fill="transparent"
                     stroke="none"
                     pointerEvents="all"
                     style={{ touchAction: "none" }}
                     onPointerDown={onAdjustPointerDown("R", p.freqHz)}
-                    onTouchStart={consumeTouchGesture}
-                    onTouchMove={consumeTouchGesture}
-                    onTouchEnd={consumeTouchGesture}
-                    onTouchCancel={consumeTouchGesture}
-                  />
-                  <circle
-                    cx={cx}
-                    cy={cy}
-                    r={RIGHT_MARKER_R + 2}
-                    fill="transparent"
-                    stroke="#f87171"
-                    strokeWidth="3"
-                    opacity="0.55"
                   />
                 </g>
               );
@@ -1445,8 +1412,8 @@ export default function HearingLoss() {
                   aria-valuenow={dbhl}
                   onKeyDown={onAdjustKeyDown("L", p.freqHz)}
                 >
-                  <line x1={cx - s} y1={cy - s} x2={cx + s} y2={cy + s} />
-                  <line x1={cx - s} y1={cy + s} x2={cx + s} y2={cy - s} />
+                  <line x1={cx - s} y1={cy - s} x2={cx + s} y2={cy + s} pointerEvents="none" />
+                  <line x1={cx - s} y1={cy + s} x2={cx + s} y2={cy - s} pointerEvents="none" />
                   <circle
                     cx={cx}
                     cy={cy}
@@ -1456,10 +1423,6 @@ export default function HearingLoss() {
                     pointerEvents="all"
                     style={{ touchAction: "none" }}
                     onPointerDown={onAdjustPointerDown("L", p.freqHz)}
-                    onTouchStart={consumeTouchGesture}
-                    onTouchMove={consumeTouchGesture}
-                    onTouchEnd={consumeTouchGesture}
-                    onTouchCancel={consumeTouchGesture}
                   />
                 </g>
               );
