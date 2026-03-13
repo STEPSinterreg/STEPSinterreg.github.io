@@ -112,7 +112,7 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.backToMainMenu": "Tilbage til hovedmenu",
 
     "hearingLossExperience.menu.title": "Høretabsoplevelse",
-    "hearingLossExperience.menu.body": "En læringssimulation, der viser hvordan hørenedsættelse kan påvirke lyd — og hvordan en simpel justering kan forbedre tydelighed.",
+    "hearingLossExperience.menu.body": "En læringssimulation, der viser hvordan hørenedsættelse kan påvirke lyd, og hvordan en simpel justering kan forbedre tydelighed.",
     "hearingLossExperience.menu.introCta": "Start introduktion",
     "hearingLossExperience.menu.levelsTitle": "Niveauer",
 
@@ -336,7 +336,7 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.backToMainMenu": "Zurück zum Hauptmenü",
 
     "hearingLossExperience.menu.title": "Hörverlust-Erlebnis",
-    "hearingLossExperience.menu.body": "Eine Lernsimulation, die zeigt, wie Hörverlust Klang verändern kann — und wie einfache Anpassungen die Verständlichkeit verbessern.",
+    "hearingLossExperience.menu.body": "Eine Lernsimulation, die zeigt, wie Hörverlust Klang verändern kann, und wie einfache Anpassungen die Verständlichkeit verbessern.",
     "hearingLossExperience.menu.introCta": "Einführung starten",
     "hearingLossExperience.menu.levelsTitle": "Levels",
 
@@ -455,7 +455,7 @@ export const translations: Record<string, Record<string, string>> = {
     "audio_stage": "Audio Stage",
     "controls": "Controls",
     "controls_slider": "Later: sliders to correct EQ bands.",
-    "controls_mc": "Later: multiple-choice — which profile do you think it is?",
+    "controls_mc": "Later: multiple-choice - which profile do you think it is?",
     "app_subtitle": "Interactive Simulations",
     "back_to_dashboard": "Back to main menu",
     "open_experience": "Open experience",
@@ -560,7 +560,7 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.backToMainMenu": "Back to main menu",
 
     "hearingLossExperience.menu.title": "Hearing Loss Experience",
-    "hearingLossExperience.menu.body": "A learning simulation showing how hearing loss can change sound — and how simple adjustments can improve clarity.",
+    "hearingLossExperience.menu.body": "A learning simulation showing how hearing loss can change sound, and how simple adjustments can improve clarity.",
     "hearingLossExperience.menu.introCta": "Start introduction",
     "hearingLossExperience.menu.levelsTitle": "Levels",
 
