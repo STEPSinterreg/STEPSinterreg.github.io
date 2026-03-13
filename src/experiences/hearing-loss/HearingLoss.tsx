@@ -873,6 +873,21 @@ export default function HearingLoss() {
   const dragPointerIdRef = useRef<number | null>(null);
   const dragCaptureRef = useRef<SVGElement | null>(null);
 
+  useEffect(() => {
+    if (!dragTarget) return;
+
+    const preventTouchScroll = (e: TouchEvent) => {
+      e.preventDefault();
+    };
+
+    // Keep the active drag gesture from being handed off to page scrolling
+    // on mobile browsers that are less reliable with SVG touch-action.
+    document.addEventListener("touchmove", preventTouchScroll, { passive: false });
+    return () => {
+      document.removeEventListener("touchmove", preventTouchScroll);
+    };
+  }, [dragTarget]);
+
   // Map draggable audiogram points to per-frequency EQ in dB.
   const correctionEqByEar = useMemo(() => {
     if (activeStage !== "correct") return null;
@@ -969,6 +984,7 @@ export default function HearingLoss() {
 
   const onPointPointerUp = (e: React.PointerEvent<SVGSVGElement>) => {
     if (!dragTarget) return;
+    if (dragPointerIdRef.current !== null && e.pointerId !== dragPointerIdRef.current) return;
     e.preventDefault();
     setDragTarget(null);
     if (dragCaptureRef.current && dragPointerIdRef.current !== null) {
@@ -1357,6 +1373,7 @@ export default function HearingLoss() {
                     pointerEvents="all"
                     style={{ touchAction: "none" }}
                     onPointerDown={onAdjustPointerDown("R", p.freqHz)}
+                    onTouchStart={(e) => e.preventDefault()}
                   />
                 </g>
               );
@@ -1423,6 +1440,7 @@ export default function HearingLoss() {
                     pointerEvents="all"
                     style={{ touchAction: "none" }}
                     onPointerDown={onAdjustPointerDown("L", p.freqHz)}
+                    onTouchStart={(e) => e.preventDefault()}
                   />
                 </g>
               );
