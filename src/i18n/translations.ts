@@ -110,6 +110,7 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.audiogramPlaceholder": "Pladsholder",
 
     "hearingLossExperience.backToMainMenu": "Tilbage til hovedmenu",
+    "hearingLossExperience.backToHearingMenu": "Tilbage til høremenuen",
 
     "hearingLossExperience.menu.title": "Høretabsoplevelse",
     "hearingLossExperience.menu.body": "En læringssimulation, der viser hvordan hørenedsættelse kan påvirke lyd, og hvordan en simpel justering kan forbedre tydelighed.",
@@ -342,6 +343,7 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.audiogramPlaceholder": "Platzhalter",
 
     "hearingLossExperience.backToMainMenu": "Zurück zum Hauptmenü",
+    "hearingLossExperience.backToHearingMenu": "Zurück zum Hörmenü",
 
     "hearingLossExperience.menu.title": "Hörverlust-Erlebnis",
     "hearingLossExperience.menu.body": "Eine Lernsimulation, die zeigt, wie Hörverlust Klang verändern kann, und wie einfache Anpassungen die Verständlichkeit verbessern.",
@@ -574,6 +576,7 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.audiogramPlaceholder": "Placeholder",
 
     "hearingLossExperience.backToMainMenu": "Back to main menu",
+    "hearingLossExperience.backToHearingMenu": "Back to hearing menu",
 
     "hearingLossExperience.menu.title": "Hearing Loss Experience",
     "hearingLossExperience.menu.body": "A learning simulation showing how hearing loss can change sound, and how simple adjustments can improve clarity.",

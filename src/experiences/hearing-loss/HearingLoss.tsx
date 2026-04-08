@@ -257,11 +257,10 @@ export default function HearingLoss() {
     };
   }, []);
 
-  const goToLanding = () => setSearchParams({});
   const goToExperienceMenu = () => setSearchParams({ screen: "experience" });
   const goToCompare = () => setSearchParams({ screen: "compare" });
 
-  // Legacy alias used in the level-complete buttons below.
+  // Used in the level-complete buttons.
   const goToMenu = goToExperienceMenu;
 
   const startLevel = (id: LevelId) => {
@@ -1478,7 +1477,7 @@ export default function HearingLoss() {
             <button
               type="button"
               onClick={goToCompare}
-              className="group flex flex-col items-center gap-4 rounded-2xl border border-slate-700 bg-slate-900/30 p-6 text-center hover:bg-slate-800/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:p-8"
+              className="group flex flex-col items-center gap-4 rounded-2xl border border-slate-700 bg-slate-900/30 p-6 text-center hover:bg-slate-800/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:min-h-80 sm:justify-center sm:p-10"
             >
               <img
                 src="/icons/listen 512x512.png"
@@ -1499,7 +1498,7 @@ export default function HearingLoss() {
             <button
               type="button"
               onClick={goToExperienceMenu}
-              className="group flex flex-col items-center gap-4 rounded-2xl border border-slate-700 bg-slate-900/30 p-6 text-center hover:bg-slate-800/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:p-8"
+              className="group flex flex-col items-center gap-4 rounded-2xl border border-slate-700 bg-slate-900/30 p-6 text-center hover:bg-slate-800/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:min-h-80 sm:justify-center sm:p-10"
             >
               <img
                 src="/icons/audiogram 512x512.png"
@@ -1519,24 +1518,13 @@ export default function HearingLoss() {
         </div>
       ) : screen === "compare" ? (
         // --- Compare dashboard ---------------------------------------------------
-        <HearingLossCompare onBack={goToLanding} />
+        <HearingLossCompare />
       ) : !isInLevel ? (
         // --- Experience menu (minimal) -------------------------------------------
         <div className="space-y-6">
           <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5 sm:p-6">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-              <button
-                type="button"
-                onClick={goToLanding}
-                className="inline-flex w-max items-center rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-              >
-                ← {t["hearingLossExperience.compare.back"]}
-              </button>
-              <div>
-                <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{t["hearingLossExperience.menu.title"]}</h1>
-                <p className="mt-1 max-w-3xl text-sm text-slate-400">{t["hearingLossExperience.menu.body"]}</p>
-              </div>
-            </div>
+            <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{t["hearingLossExperience.menu.title"]}</h1>
+            <p className="mt-2 max-w-3xl text-sm text-slate-400">{t["hearingLossExperience.menu.body"]}</p>
           </section>
 
           <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5 sm:p-6">

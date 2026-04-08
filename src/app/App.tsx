@@ -17,6 +17,8 @@ export default function App() {
   const isHearingLoss = location.pathname.startsWith("/experiences/hearing-loss");
   const search = new URLSearchParams(location.search);
   const isHearingLossLevel = isHearingLoss && search.get("screen") === "level";
+  const isHearingLossCompare = isHearingLoss && search.get("screen") === "compare";
+  const isHearingLossExperience = isHearingLoss && search.get("screen") === "experience";
   const isHearingLossMenu = isHearingLoss && !isHearingLossLevel;
   const showHearingLossDevUnlock = isHearingLossMenu;
   const { locale } = useLocale();
@@ -71,7 +73,21 @@ export default function App() {
         </button>
       )}
 
-      {!isDashboard && !isHearingLossLevel && (
+      {/* Compare / Experience sub-screens → back to hearing landing */}
+      {(isHearingLossCompare || isHearingLossExperience) && (
+        <button
+          className={`${topBarButtonClass} border-slate-700`}
+          onClick={() => {
+            navigate("/experiences/hearing-loss");
+            setActionsMenuOpen(false);
+          }}
+        >
+          {t["hearingLossExperience.backToHearingMenu"]}
+        </button>
+      )}
+
+      {/* Hearing landing + all other non-dashboard, non-level pages → back to dashboard */}
+      {!isDashboard && !isHearingLossLevel && !isHearingLossCompare && !isHearingLossExperience && (
         <button
           className={`${topBarButtonClass} border-slate-700`}
           onClick={() => {
@@ -83,6 +99,7 @@ export default function App() {
         </button>
       )}
 
+      {/* Level → back to experience menu */}
       {isHearingLossLevel && (
         <button
           className={`${topBarButtonClass} border-slate-700`}
@@ -164,7 +181,19 @@ export default function App() {
                           </button>
                         )}
 
-                        {!isDashboard && !isHearingLossLevel && (
+                        {(isHearingLossCompare || isHearingLossExperience) && (
+                          <button
+                            className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-slate-800"
+                            onClick={() => {
+                              navigate("/experiences/hearing-loss");
+                              setActionsMenuOpen(false);
+                            }}
+                          >
+                            <span className="flex-1">{t["hearingLossExperience.backToHearingMenu"]}</span>
+                          </button>
+                        )}
+
+                        {!isDashboard && !isHearingLossLevel && !isHearingLossCompare && !isHearingLossExperience && (
                           <button
                             className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-slate-800"
                             onClick={() => {

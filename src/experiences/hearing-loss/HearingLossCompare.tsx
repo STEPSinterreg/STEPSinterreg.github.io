@@ -169,9 +169,9 @@ function CompareCard({
   void playingKind;
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/30 p-4 sm:p-5">
-      <h2 className="mb-4 text-base font-semibold text-slate-100">{title}</h2>
-      <div className="space-y-2">
+    <div className="rounded-2xl border border-slate-800 bg-slate-900/30 p-3 sm:p-4">
+      <h2 className="mb-2 text-sm font-semibold text-slate-100">{title}</h2>
+      <div className="space-y-1.5">
         {AUDIO_KINDS.map((kind) => (
           <AudioClipPlayer
             key={kind}
@@ -180,6 +180,7 @@ function CompareCard({
             ariaLabel={audioPlayerLabel}
             src={audioSrcByKind[kind]}
             loop={AUDIO_LOOP[kind]}
+            compact
             playLabel={playLabel}
             pauseLabel={pauseLabel}
             stopLabel={stopLabel}
@@ -197,7 +198,7 @@ function CompareCard({
 
 // ── HearingLossCompare ────────────────────────────────────────────────────────
 
-export function HearingLossCompare({ onBack }: { onBack: () => void }) {
+export function HearingLossCompare() {
   const { locale } = useLocale();
   const t = translations[locale];
 
@@ -258,21 +259,12 @@ export function HearingLossCompare({ onBack }: { onBack: () => void }) {
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5 sm:p-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-          <button
-            type="button"
-            onClick={onBack}
-            className="inline-flex w-max items-center rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-          >
-            ← {t["hearingLossExperience.compare.back"]}
-          </button>
-          <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
-            {t["hearingLossExperience.compare.title"]}
-          </h1>
-        </div>
+        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
+          {t["hearingLossExperience.compare.title"]}
+        </h1>
       </section>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {COMPARE_PROFILES.map(({ profileId, titleKey }) => (
           <CompareCard
             key={profileId}

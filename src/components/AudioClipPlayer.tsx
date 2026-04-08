@@ -22,6 +22,7 @@ export type AudioClipPlayerProps = {
   src: string;
   loop?: boolean;
   ariaLabel: string;
+  compact?: boolean;
 
   playLabel: string;
   pauseLabel: string;
@@ -42,6 +43,7 @@ export function AudioClipPlayer(props: AudioClipPlayerProps) {
     src,
     loop,
     ariaLabel,
+    compact = false,
     playLabel,
     pauseLabel,
     stopLabel,
@@ -166,15 +168,15 @@ export function AudioClipPlayer(props: AudioClipPlayerProps) {
   };
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-      <div className="flex items-start justify-between gap-3">
+    <div className={compact ? "rounded-lg border border-slate-800 bg-slate-950 p-2" : "rounded-xl border border-slate-800 bg-slate-950 p-4"}>
+      <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="truncate text-sm font-medium text-slate-200">{title}</div>
+          <div className={compact ? "truncate text-xs font-medium text-slate-200" : "truncate text-sm font-medium text-slate-200"}>{title}</div>
         </div>
         <div className="shrink-0 text-xs tabular-nums text-slate-500">{timeText}</div>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      <div className={compact ? "mt-1.5 flex flex-wrap items-center gap-1.5" : "mt-3 flex flex-wrap items-center gap-2"}>
         <div className="w-full">
           <input
             ref={sliderElRef}
