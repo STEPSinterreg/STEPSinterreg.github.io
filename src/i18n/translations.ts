@@ -116,6 +116,14 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.menu.introCta": "Start introduktion",
     "hearingLossExperience.menu.levelsTitle": "Niveauer",
 
+    "hearingLossExperience.landing.compareTitle": "Hør og sammenlign høretabstyper",
+    "hearingLossExperience.landing.compareBody": "Afspil testlyd med forskellige høretabsfiltre og sammenlign, hvordan de lyder.",
+    "hearingLossExperience.landing.experienceTitle": "Oplev høretab og korriger det med moderne teknologi",
+    "hearingLossExperience.landing.experienceBody": "Gennemgå en guidet oplevelse, tag en høringstest, og prøv at justere lyden med et simuleret høreapparat.",
+    "hearingLossExperience.compare.title": "Sammenlign høretabstyper",
+    "hearingLossExperience.compare.back": "Tilbage",
+    "hearingLossExperience.compare.profile.normal": "Normalt høre",
+
     "hearingLossExperience.tasks.downloadPdf": "Hent Opgaver (pdf)",
     "hearingLossExperience.tasks.downloadDocx": "Hent Opgaver (docx)",
 
@@ -340,6 +348,14 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.menu.introCta": "Einführung starten",
     "hearingLossExperience.menu.levelsTitle": "Levels",
 
+    "hearingLossExperience.landing.compareTitle": "Hörverlust-Typen hören und vergleichen",
+    "hearingLossExperience.landing.compareBody": "Spielen Sie Testton mit verschiedenen Hörverlust-Filtern ab und vergleichen Sie den Klang.",
+    "hearingLossExperience.landing.experienceTitle": "Hörverlust erleben und mit moderner Technologie korrigieren",
+    "hearingLossExperience.landing.experienceBody": "Machen Sie eine geführte Erfahrung, führen Sie einen Hörtest durch und versuchen Sie, Audio mit einem simulierten Hörgerät anzupassen.",
+    "hearingLossExperience.compare.title": "Hörverlust-Typen vergleichen",
+    "hearingLossExperience.compare.back": "Zurück",
+    "hearingLossExperience.compare.profile.normal": "Normales Gehör",
+
     "hearingLossExperience.tasks.downloadPdf": "Aufgaben herunterladen (PDF)",
     "hearingLossExperience.tasks.downloadDocx": "Aufgaben herunterladen (DOCX)",
 
@@ -563,6 +579,14 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.menu.body": "A learning simulation showing how hearing loss can change sound, and how simple adjustments can improve clarity.",
     "hearingLossExperience.menu.introCta": "Start introduction",
     "hearingLossExperience.menu.levelsTitle": "Levels",
+
+    "hearingLossExperience.landing.compareTitle": "Hear and Compare Types of Hearing Loss",
+    "hearingLossExperience.landing.compareBody": "Play audio with different hearing loss filters applied and compare how they sound.",
+    "hearingLossExperience.landing.experienceTitle": "Experience Hearing Loss and Correct It Using Modern Technology",
+    "hearingLossExperience.landing.experienceBody": "Go through a guided experience, take a hearing test, and try adjusting audio with a simulated hearing aid.",
+    "hearingLossExperience.compare.title": "Compare Hearing Loss Types",
+    "hearingLossExperience.compare.back": "Back",
+    "hearingLossExperience.compare.profile.normal": "Normal hearing",
 
     "hearingLossExperience.tasks.downloadPdf": "Download tasks (PDF)",
     "hearingLossExperience.tasks.downloadDocx": "Download tasks (DOCX)",

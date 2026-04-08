@@ -87,7 +87,7 @@ export default function App() {
         <button
           className={`${topBarButtonClass} border-slate-700`}
           onClick={() => {
-            navigate("/experiences/hearing-loss");
+            navigate("/experiences/hearing-loss?screen=experience");
             setActionsMenuOpen(false);
           }}
         >
@@ -180,7 +180,7 @@ export default function App() {
                           <button
                             className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-slate-800"
                             onClick={() => {
-                              navigate("/experiences/hearing-loss");
+                              navigate("/experiences/hearing-loss?screen=experience");
                               setActionsMenuOpen(false);
                             }}
                           >

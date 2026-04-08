@@ -17,6 +17,7 @@ import {
   LOUDNESS_START_LEVEL,
 } from "./audiometry/loudness";
 import { HIDE_HEARING_LOSS_PROFILE_LABELS, isHearingLossLevelEnabled } from "./levelConfig";
+import { HearingLossCompare } from "./HearingLossCompare";
 
 const LEVELS = [
   {
@@ -219,7 +220,13 @@ export default function HearingLoss() {
     return enabled.length > 0 ? enabled : all;
   }, [isHearingLossLevelEnabled]);
 
-  const screen = searchParams.get("screen") === "level" ? "level" : "menu";
+  const screenParam = searchParams.get("screen");
+  const screen =
+    screenParam === "level"      ? "level"      :
+    screenParam === "experience" ? "experience" :
+    screenParam === "compare"    ? "compare"    :
+    "landing";
+
   const levelParam = (searchParams.get("level") ?? "") as LevelId;
   const stageParam = (searchParams.get("stage") ?? "") as LevelStage;
 
@@ -250,7 +257,12 @@ export default function HearingLoss() {
     };
   }, []);
 
-  const goToMenu = () => setSearchParams({});
+  const goToLanding = () => setSearchParams({});
+  const goToExperienceMenu = () => setSearchParams({ screen: "experience" });
+  const goToCompare = () => setSearchParams({ screen: "compare" });
+
+  // Legacy alias used in the level-complete buttons below.
+  const goToMenu = goToExperienceMenu;
 
   const startLevel = (id: LevelId) => {
     // Prevent navigation into disabled levels (e.g. via copied URL).
@@ -1453,12 +1465,78 @@ export default function HearingLoss() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-      {!isInLevel ? (
-        // --- Main menu (minimal) ---
+      {screen === "landing" ? (
+        // --- Landing: choose a mode -----------------------------------------------
         <div className="space-y-6">
           <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5 sm:p-6">
             <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{t["hearingLossExperience.menu.title"]}</h1>
             <p className="mt-2 max-w-3xl text-sm text-slate-400">{t["hearingLossExperience.menu.body"]}</p>
+          </section>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {/* Hear & compare */}
+            <button
+              type="button"
+              onClick={goToCompare}
+              className="group flex flex-col items-center gap-4 rounded-2xl border border-slate-700 bg-slate-900/30 p-6 text-center hover:bg-slate-800/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:p-8"
+            >
+              <img
+                src="/icons/listen 512x512.png"
+                alt=""
+                className="h-20 w-20 object-contain opacity-90 transition-opacity group-hover:opacity-100 sm:h-24 sm:w-24"
+              />
+              <div>
+                <div className="text-base font-semibold text-slate-100 sm:text-lg">
+                  {t["hearingLossExperience.landing.compareTitle"]}
+                </div>
+                <div className="mt-2 text-sm text-slate-400">
+                  {t["hearingLossExperience.landing.compareBody"]}
+                </div>
+              </div>
+            </button>
+
+            {/* Full experience */}
+            <button
+              type="button"
+              onClick={goToExperienceMenu}
+              className="group flex flex-col items-center gap-4 rounded-2xl border border-slate-700 bg-slate-900/30 p-6 text-center hover:bg-slate-800/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:p-8"
+            >
+              <img
+                src="/icons/audiogram 512x512.png"
+                alt=""
+                className="h-20 w-20 object-contain opacity-90 transition-opacity group-hover:opacity-100 sm:h-24 sm:w-24"
+              />
+              <div>
+                <div className="text-base font-semibold text-slate-100 sm:text-lg">
+                  {t["hearingLossExperience.landing.experienceTitle"]}
+                </div>
+                <div className="mt-2 text-sm text-slate-400">
+                  {t["hearingLossExperience.landing.experienceBody"]}
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+      ) : screen === "compare" ? (
+        // --- Compare dashboard ---------------------------------------------------
+        <HearingLossCompare onBack={goToLanding} />
+      ) : !isInLevel ? (
+        // --- Experience menu (minimal) -------------------------------------------
+        <div className="space-y-6">
+          <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5 sm:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+              <button
+                type="button"
+                onClick={goToLanding}
+                className="inline-flex w-max items-center rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+              >
+                ← {t["hearingLossExperience.compare.back"]}
+              </button>
+              <div>
+                <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{t["hearingLossExperience.menu.title"]}</h1>
+                <p className="mt-1 max-w-3xl text-sm text-slate-400">{t["hearingLossExperience.menu.body"]}</p>
+              </div>
+            </div>
           </section>
 
           <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5 sm:p-6">
