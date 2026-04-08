@@ -1469,7 +1469,7 @@ export default function HearingLoss() {
         <div className="space-y-6">
           <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5 sm:p-6">
             <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{t["hearingLossExperience.menu.title"]}</h1>
-            <p className="mt-2 max-w-3xl text-sm text-slate-400">{t["hearingLossExperience.menu.body"]}</p>
+            <p className="mt-2 max-w-3xl text-sm text-slate-400">{t["hearingLossExperience.landing.headerBody"]}</p>
           </section>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

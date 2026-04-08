@@ -20,7 +20,7 @@ export default function App() {
   const isHearingLossCompare = isHearingLoss && search.get("screen") === "compare";
   const isHearingLossExperience = isHearingLoss && search.get("screen") === "experience";
   const isHearingLossMenu = isHearingLoss && !isHearingLossLevel;
-  const showHearingLossDevUnlock = isHearingLossMenu;
+  const showHearingLossDevUnlock = isHearingLossExperience;
   const { locale } = useLocale();
   const t = translations[locale];
 
@@ -56,13 +56,18 @@ export default function App() {
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, []);
 
-  const topBarButtonClass = "inline-flex h-10 items-center justify-center rounded-xl border px-3 text-sm hover:bg-slate-900";
+  // Full-height bar button: parent uses items-stretch + fixed min-height so every
+  // button fills the entire topbar. No rounded corners, no gap between siblings.
+  const topBarButtonClass = "inline-flex h-full items-center justify-center px-3 text-sm text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-slate-400";
+
+  // Dev-unlock still gets a faint amber tint so it stays visually distinct.
+  const devButtonClass = "inline-flex h-full items-center justify-center px-3 text-sm text-amber-400 transition-colors hover:bg-amber-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-500";
 
   const headerActions = (
     <>
       {!isDashboard && !isHearingLossLevel && showHearingLossDevUnlock && (
         <button
-          className={`${topBarButtonClass} border-amber-700`}
+          className={devButtonClass}
           title={t["app.devUnlockAllTitle"]}
           onClick={() => {
             window.dispatchEvent(new CustomEvent("hearingLoss:unlockAll"));
@@ -76,7 +81,7 @@ export default function App() {
       {/* Compare / Experience sub-screens → back to hearing landing */}
       {(isHearingLossCompare || isHearingLossExperience) && (
         <button
-          className={`${topBarButtonClass} border-slate-700`}
+          className={topBarButtonClass}
           onClick={() => {
             navigate("/experiences/hearing-loss");
             setActionsMenuOpen(false);
@@ -89,7 +94,7 @@ export default function App() {
       {/* Hearing landing + all other non-dashboard, non-level pages → back to dashboard */}
       {!isDashboard && !isHearingLossLevel && !isHearingLossCompare && !isHearingLossExperience && (
         <button
-          className={`${topBarButtonClass} border-slate-700`}
+          className={topBarButtonClass}
           onClick={() => {
             navigate("/");
             setActionsMenuOpen(false);
@@ -102,7 +107,7 @@ export default function App() {
       {/* Level → back to experience menu */}
       {isHearingLossLevel && (
         <button
-          className={`${topBarButtonClass} border-slate-700`}
+          className={topBarButtonClass}
           onClick={() => {
             navigate("/experiences/hearing-loss?screen=experience");
             setActionsMenuOpen(false);
@@ -119,18 +124,23 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <header className="sticky top-0 z-10 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-          <div className="flex items-center gap-3">
+        <div className="mx-auto flex max-w-6xl min-h-14 items-stretch justify-between px-4">
+          {/* Logo + title — full-height, no rounded, navigates home on click */}
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="flex items-center gap-3 px-2 -ml-2 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-slate-400"
+          >
             <img src={`/icons/${locale}.png`} alt={t["common.logoAlt"]} className="h-8 w-8 rounded-xl object-cover" />
-            <div>
+            <div className="text-left">
               <div className="text-sm font-semibold leading-4">{t["app_name"]}</div>
               <div className="text-xs text-slate-400">{t["app_subtitle"]}</div>
             </div>
-          </div>
+          </button>
 
-          <div className="relative flex items-center gap-2 sm:gap-3">
+          <div className="relative flex items-stretch gap-0">
             <LanguageToggle
-              buttonClass={`${topBarButtonClass} border-slate-700`}
+              buttonClass={topBarButtonClass}
               open={languageMenuOpen}
               onOpenChange={(open) => {
                 setLanguageMenuOpen(open);
@@ -141,12 +151,12 @@ export default function App() {
 
             {showHeaderActions && (
               <>
-                <div className="hidden items-center gap-2 sm:flex">{headerActions}</div>
+                <div className="hidden items-stretch gap-0 sm:flex">{headerActions}</div>
 
                 <div className="sm:hidden" ref={actionsMenuRef}>
                   <button
                     type="button"
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 hover:bg-slate-900"
+                    className="inline-flex h-full w-11 items-center justify-center text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-slate-400"
                     aria-label={t["app.openActionsMenu"]}
                     aria-haspopup="menu"
                     aria-expanded={actionsMenuOpen}

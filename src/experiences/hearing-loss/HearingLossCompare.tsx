@@ -262,6 +262,7 @@ export function HearingLossCompare() {
         <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
           {t["hearingLossExperience.compare.title"]}
         </h1>
+        <p className="mt-2 max-w-3xl text-sm text-slate-400">{t["hearingLossExperience.compare.body"]}</p>
       </section>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
