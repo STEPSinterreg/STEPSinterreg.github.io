@@ -19,7 +19,6 @@ export default function App() {
   const isHearingLossLevel = isHearingLoss && search.get("screen") === "level";
   const isHearingLossCompare = isHearingLoss && search.get("screen") === "compare";
   const isHearingLossExperience = isHearingLoss && search.get("screen") === "experience";
-  const isHearingLossMenu = isHearingLoss && !isHearingLossLevel;
   const showHearingLossDevUnlock = isHearingLossExperience;
   const { locale } = useLocale();
   const t = translations[locale];
