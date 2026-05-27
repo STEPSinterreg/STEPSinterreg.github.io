@@ -8,6 +8,7 @@ import { AUDIOGRAM_FREQUENCIES_HZ, defaultCalibrationProfile } from "../../audio
 import { hashStringToSeed, hearingLossProfileById, sampleHearingLossProfile } from "../../audio/hearingLossProfiles";
 import type { HearingProfile } from "../../audio/profiles";
 import { useLocale } from "../../i18n/LocaleContext";
+import { useTheme } from "../../i18n/ThemeContext";
 import { translations } from "../../i18n/translations";
 import { type Ear } from "./audiometry/rapp";
 import { createAudiometrySession, type AudiometrySession } from "./audiometry/model";
@@ -208,8 +209,14 @@ function clamp(n: number, min: number, max: number) {
 
 export default function HearingLoss() {
   const { locale } = useLocale();
+  const { resolved: theme } = useTheme();
   const t = translations[locale];
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const isDark = theme === "dark";
+  const svgGrid = isDark ? "#334155" : "#ddd9d4";
+  const svgLabelDim = isDark ? "#94a3b8" : "#6b7280";
+  const svgLabelMid = isDark ? "#cbd5e1" : "#9ca3af";
 
   // In-memory per-level progress. Intentionally not persisted: refresh resets the experience.
   const levelSessionsRef = useRef<Partial<Record<LevelId, LevelSessionState>>>({});
@@ -1078,8 +1085,8 @@ export default function HearingLoss() {
           const y = yForValue(yValueForDbHl(db));
           return (
             <g key={db}>
-              <line x1={padLeft} x2={rightPlotX} y1={y} y2={y} stroke="#1f2937" strokeWidth="1" />
-              <text x={padLeft - 10} y={y + 4} fill="#64748b" fontSize="11" textAnchor="end">
+              <line x1={padLeft} x2={rightPlotX} y1={y} y2={y} stroke={svgGrid} strokeWidth="1" />
+              <text x={padLeft - 10} y={y + 4} fill={svgLabelDim} fontSize="11" textAnchor="end">
                 {db}
               </text>
             </g>
@@ -1089,11 +1096,11 @@ export default function HearingLoss() {
         {/* Vertical grid lines (frequency ticks) */}
         {TEST_FREQUENCIES_HZ.map((f, idx) => {
           const x = xForIndex(idx);
-          return <line key={`grid-x-${f}`} x1={x} x2={x} y1={padTop} y2={padTop + innerH} stroke="#1f2937" strokeWidth="1" />;
+          return <line key={`grid-x-${f}`} x1={x} x2={x} y1={padTop} y2={padTop + innerH} stroke={svgGrid} strokeWidth="1" />;
         })}
 
         {/* Right-side scale (hearing loss categories) */}
-        <line x1={scaleLineX} x2={scaleLineX} y1={padTop} y2={padTop + innerH} stroke="#1f2937" strokeWidth="1" />
+        <line x1={scaleLineX} x2={scaleLineX} y1={padTop} y2={padTop + innerH} stroke={svgGrid} strokeWidth="1" />
         {scaleBoundariesDb.map((db) => {
           const y = yForValue(yValueForDbHl(db));
           return (
@@ -1103,7 +1110,7 @@ export default function HearingLoss() {
               x2={scaleLineX + scaleNotchLen}
               y1={y}
               y2={y}
-              stroke="#1f2937"
+              stroke={svgGrid}
               strokeWidth="1"
             />
           );
@@ -1112,7 +1119,7 @@ export default function HearingLoss() {
           const midDb = (b.min + b.max) / 2;
           const y = yForValue(yValueForDbHl(midDb));
           return (
-            <text key={b.key} x={rightLabelX} y={y + 4} fill="#94a3b8" fontSize="10" textAnchor="start">
+            <text key={b.key} x={rightLabelX} y={y + 4} fill={svgLabelMid} fontSize="10" textAnchor="start">
               {t[b.key]}
             </text>
           );
@@ -1120,7 +1127,7 @@ export default function HearingLoss() {
 
         {/* X labels */}
         {TEST_FREQUENCIES_HZ.map((f, idx) => (
-          <text key={f} x={xForIndex(idx)} y={svgH - 12} fill="#94a3b8" fontSize="11" textAnchor="middle">
+          <text key={f} x={xForIndex(idx)} y={svgH - 12} fill={svgLabelMid} fontSize="11" textAnchor="middle">
             {f >= 1000 ? `${f / 1000} ${t["common.khz"]}` : `${f} ${t["common.hz"]}`}
           </text>
         ))}
@@ -1469,9 +1476,9 @@ export default function HearingLoss() {
       {screen === "landing" ? (
         // --- Landing: choose a mode -----------------------------------------------
         <div className="space-y-6">
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5 sm:p-6">
+          <section className="rounded-2xl border border-surface-300 bg-white shadow-sm p-5 sm:p-6">
             <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{t["hearingLossExperience.menu.title"]}</h1>
-            <p className="mt-2 max-w-3xl text-sm text-slate-400">{t["hearingLossExperience.landing.headerBody"]}</p>
+            <p className="mt-2 max-w-3xl text-sm text-gray-500">{t["hearingLossExperience.landing.headerBody"]}</p>
           </section>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -1479,18 +1486,18 @@ export default function HearingLoss() {
             <button
               type="button"
               onClick={goToCompare}
-              className="group flex flex-col items-center gap-4 rounded-2xl border border-slate-700 bg-slate-900/30 p-6 text-center hover:bg-slate-800/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:min-h-80 sm:justify-center sm:p-10"
+              className="group flex flex-col items-center gap-4 rounded-2xl border border-surface-300 bg-white shadow-sm p-6 text-center hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 sm:min-h-80 sm:justify-center sm:p-10"
             >
               <img
                 src="/icons/listen 512x512.png"
                 alt=""
-                className="h-20 w-20 object-contain opacity-90 transition-opacity group-hover:opacity-100 sm:h-24 sm:w-24"
+                className="h-20 w-20 object-contain brightness-0 opacity-90 transition-opacity group-hover:opacity-100 sm:h-24 sm:w-24"
               />
               <div>
-                <div className="text-base font-semibold text-slate-100 sm:text-lg">
+                <div className="text-base font-semibold text-gray-800 sm:text-lg">
                   {t["hearingLossExperience.landing.compareTitle"]}
                 </div>
-                <div className="mt-2 text-sm text-slate-400">
+                <div className="mt-2 text-sm text-gray-500">
                   {t["hearingLossExperience.landing.compareBody"]}
                 </div>
               </div>
@@ -1500,18 +1507,18 @@ export default function HearingLoss() {
             <button
               type="button"
               onClick={goToExperienceMenu}
-              className="group flex flex-col items-center gap-4 rounded-2xl border border-slate-700 bg-slate-900/30 p-6 text-center hover:bg-slate-800/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:min-h-80 sm:justify-center sm:p-10"
+              className="group flex flex-col items-center gap-4 rounded-2xl border border-surface-300 bg-white shadow-sm p-6 text-center hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 sm:min-h-80 sm:justify-center sm:p-10"
             >
               <img
                 src="/icons/audiogram 512x512.png"
                 alt=""
-                className="h-20 w-20 object-contain opacity-90 transition-opacity group-hover:opacity-100 sm:h-24 sm:w-24"
+                className="h-20 w-20 object-contain brightness-0 opacity-90 transition-opacity group-hover:opacity-100 sm:h-24 sm:w-24"
               />
               <div>
-                <div className="text-base font-semibold text-slate-100 sm:text-lg">
+                <div className="text-base font-semibold text-gray-800 sm:text-lg">
                   {t["hearingLossExperience.landing.experienceTitle"]}
                 </div>
-                <div className="mt-2 text-sm text-slate-400">
+                <div className="mt-2 text-sm text-gray-500">
                   {t["hearingLossExperience.landing.experienceBody"]}
                 </div>
               </div>
@@ -1524,39 +1531,39 @@ export default function HearingLoss() {
       ) : !isInLevel ? (
         // --- Experience menu (minimal) -------------------------------------------
         <div className="space-y-6">
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5 sm:p-6">
+          <section className="rounded-2xl border border-surface-300 bg-white shadow-sm p-5 sm:p-6">
             <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{t["hearingLossExperience.menu.title"]}</h1>
-            <p className="mt-2 max-w-3xl text-sm text-slate-400">{t["hearingLossExperience.menu.body"]}</p>
+            <p className="mt-2 max-w-3xl text-sm text-gray-500">{t["hearingLossExperience.menu.body"]}</p>
           </section>
 
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5 sm:p-6">
+          <section className="rounded-2xl border border-surface-300 bg-white shadow-sm p-5 sm:p-6">
             <div className="flex flex-col gap-3 sm:flex-row">
               <a
                 href={TASKS_PDF_HREF}
                 download
-                className="inline-flex w-full items-center justify-center rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                className="inline-flex w-full items-center justify-center rounded-xl border border-surface-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
               >
                 {t["hearingLossExperience.tasks.downloadPdf"]}
               </a>
               <a
                 href={TASKS_DOCX_HREF}
                 download
-                className="inline-flex w-full items-center justify-center rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                className="inline-flex w-full items-center justify-center rounded-xl border border-surface-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
               >
                 {t["hearingLossExperience.tasks.downloadDocx"]}
               </a>
             </div>
           </section>
 
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5 sm:p-6">
+          <section className="rounded-2xl border border-surface-300 bg-white shadow-sm p-5 sm:p-6">
             <div className="space-y-3">
               <button
                 type="button"
                 onClick={() => startLevel("intro")}
-                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-4 text-left hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                className="w-full rounded-xl border border-surface-300 bg-white px-4 py-4 text-left hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
               >
                 <div className="text-base font-semibold">{t["hearingLossExperience.menu.introCta"]}</div>
-                <div className="mt-1 text-sm text-slate-400">{t["hearingLossExperience.level.intro.subtitle"]}</div>
+                <div className="mt-1 text-sm text-gray-500">{t["hearingLossExperience.level.intro.subtitle"]}</div>
               </button>
 
               <div className="pt-2">
@@ -1578,22 +1585,22 @@ export default function HearingLoss() {
                           disabled={locked}
                           aria-disabled={locked}
                           className={
-                            "w-full rounded-xl border border-slate-800 px-4 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 " +
-                            (locked ? "cursor-not-allowed opacity-60" : "hover:bg-slate-900")
+                            "w-full rounded-xl border border-surface-300 px-4 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 " +
+                            (locked ? "cursor-not-allowed opacity-60" : "hover:bg-surface-100")
                           }
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div>
                               <div className="font-semibold">{title}</div>
-                              <div className="mt-0.5 text-xs text-slate-400">{subtitle}</div>
+                              <div className="mt-0.5 text-xs text-gray-500">{subtitle}</div>
                             </div>
                             {completed && (
-                              <span className="rounded-full border border-slate-700 px-2 py-1 text-xs text-slate-300">
+                              <span className="rounded-full border border-surface-300 px-2 py-1 text-xs text-gray-600">
                                 {t["hearingLossExperience.badge.completed"]}
                               </span>
                             )}
                             {locked && (
-                              <span className="rounded-full border border-slate-700 px-2 py-1 text-xs text-slate-300">
+                              <span className="rounded-full border border-surface-300 px-2 py-1 text-xs text-gray-600">
                                 {t["hearingLossExperience.badge.locked"]}
                               </span>
                             )}
@@ -1609,11 +1616,11 @@ export default function HearingLoss() {
       ) : (
         // --- Level flow (minimal, step-based) ---
         <div className="space-y-6">
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5 sm:p-6">
+          <section className="rounded-2xl border border-surface-300 bg-white shadow-sm p-5 sm:p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{visibleLevelTitle}</h1>
-                <p className="mt-1 text-sm text-slate-400">{visibleLevelSubtitle}</p>
+                <p className="mt-1 text-sm text-gray-500">{visibleLevelSubtitle}</p>
               </div>
 
               <div className="flex items-center gap-2">
@@ -1622,7 +1629,7 @@ export default function HearingLoss() {
                     key={s}
                     className={
                       "rounded-full border px-2 py-1 text-xs " +
-                      (normalizedStage === s ? "border-slate-600 text-slate-200" : "border-slate-800 text-slate-500")
+                      (normalizedStage === s ? "border-steps-300 text-gray-700" : "border-surface-300 text-gray-400")
                     }
                   >
                     {t[`hearingLossExperience.stage.${s}`]}
@@ -1632,17 +1639,17 @@ export default function HearingLoss() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5 sm:p-6">
+          <section className="rounded-2xl border border-surface-300 bg-white shadow-sm p-5 sm:p-6">
             {normalizedStage === "listen" && (
               <div className="space-y-4">
-                <div className="text-sm text-slate-400">{t["hearingLossExperience.listen.body"]}</div>
+                <div className="text-sm text-gray-500">{t["hearingLossExperience.listen.body"]}</div>
 
-                <details className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                  <summary className="cursor-pointer text-sm font-medium text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950">
+                <details className="rounded-xl border border-surface-300 bg-surface-50 p-4">
+                  <summary className="cursor-pointer text-sm font-medium text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100">
                     {t["hearingLossExperience.guide.title"]}
                   </summary>
-                  <div className="mt-3 text-sm text-slate-400">{t["hearingLossExperience.guide.notDb"]}</div>
-                  <div className="mt-2 text-sm text-slate-400">{t["hearingLossExperience.guide.listenTips"]}</div>
+                  <div className="mt-3 text-sm text-gray-500">{t["hearingLossExperience.guide.notDb"]}</div>
+                  <div className="mt-2 text-sm text-gray-500">{t["hearingLossExperience.guide.listenTips"]}</div>
                 </details>
 
                 <div className="space-y-3">
@@ -1670,7 +1677,7 @@ export default function HearingLoss() {
                   <button
                     type="button"
                     onClick={() => setStage("test")}
-                    className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm font-medium hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                    className="rounded-lg border border-surface-300 bg-white px-3 py-2 text-sm font-medium hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
                   >
                     {t["hearingLossExperience.proceed"]}
                   </button>
@@ -1684,43 +1691,43 @@ export default function HearingLoss() {
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
-                        <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                        <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                           {t["hearingLossExperience.test.progress"]}
                         </div>
-                        <div className="mt-0.5 text-base font-semibold text-slate-100" aria-live="polite">
+                        <div className="mt-0.5 text-base font-semibold text-gray-800" aria-live="polite">
                           {progressNow} / {totalTestSteps}
                         </div>
                       </div>
                     </div>
 
-                    <div className="h-2 w-full rounded-full bg-slate-800" aria-hidden="true">
-                      <div className="h-2 rounded-full bg-slate-600" style={{ width: `${progressPct}%` }} />
+                    <div className="h-2 w-full rounded-full bg-surface-200" aria-hidden="true">
+                      <div className="h-2 rounded-full bg-steps-400" style={{ width: `${progressPct}%` }} />
                     </div>
 
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                        <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      <div className="rounded-xl border border-surface-300 bg-surface-50 p-4">
+                        <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">
                           {t["hearingLossExperience.test.currentEar"]}
                         </div>
-                        <div className="mt-1 text-lg font-semibold text-slate-100">
+                        <div className="mt-1 text-lg font-semibold text-gray-800">
                           {ear === "R" ? t["hearingLossExperience.test.earRight"] : t["hearingLossExperience.test.earLeft"]}
                         </div>
                       </div>
 
-                      <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                        <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      <div className="rounded-xl border border-surface-300 bg-surface-50 p-4">
+                        <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">
                           {t["hearingLossExperience.test.currentFreq"]}
                         </div>
-                        <div className="mt-1 text-lg font-semibold text-slate-100">
+                        <div className="mt-1 text-lg font-semibold text-gray-800">
                           {currentFreq} {t["common.hz"]}
                         </div>
                       </div>
                     </div>
 
-                    <div className="text-sm text-slate-400">{t["hearingLossExperience.test.body"]}</div>
+                    <div className="text-sm text-gray-500">{t["hearingLossExperience.test.body"]}</div>
                   </div>
 
-                  <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
+                  <div className="rounded-xl border border-surface-300 bg-surface-50 p-4">
                     <LabeledSlider
                       label={t["hearingLossExperience.test.loudnessLabel"]}
                       min={DBHL_MIN}
@@ -1739,7 +1746,7 @@ export default function HearingLoss() {
                         setToneError(null);
                       }}
                     />
-                    <div className="mt-2 text-xs text-slate-500">
+                    <div className="mt-2 text-xs text-gray-400">
                       {t["hearingLossExperience.test.loudnessHint"]}
                     </div>
                   </div>
@@ -1757,11 +1764,11 @@ export default function HearingLoss() {
                       aria-pressed={muted}
                       aria-label={t["hearingLossExperience.test.mute"]}
                       className={
-                        "flex items-center justify-center rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 " +
+                        "flex items-center justify-center rounded-lg border border-surface-300 bg-white px-3 py-2 hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 " +
                         (muted ? "opacity-70" : "")
                       }
                     >
-                      <img src={muted ? "/icons/unMuteButton2.png" : "/icons/muteButton2.png"} alt="" className="h-5 w-5" />
+                      <img src={muted ? "/icons/unMuteButton2.png" : "/icons/muteButton2.png"} alt="" className="h-5 w-5 brightness-0" />
                     </button>
 
                     <button
@@ -1770,7 +1777,7 @@ export default function HearingLoss() {
                       disabled={ear === "R" && freqIndex === 0}
                       aria-disabled={ear === "R" && freqIndex === 0}
                       className={
-                        "rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 " +
+                        "rounded-lg border border-surface-300 px-3 py-2 text-sm hover:bg-surface-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 " +
                         (ear === "R" && freqIndex === 0 ? "cursor-not-allowed opacity-60" : "")
                       }
                     >
@@ -1780,7 +1787,7 @@ export default function HearingLoss() {
                     <button
                       type="button"
                       onClick={clearTestData}
-                      className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                      className="rounded-lg border border-surface-300 px-3 py-2 text-sm hover:bg-surface-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
                     >
                       {t["hearingLossExperience.test.clear"]}
                     </button>
@@ -1790,7 +1797,7 @@ export default function HearingLoss() {
                     <button
                       type="button"
                       onClick={continueStep}
-                      className="rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm font-semibold text-slate-100 hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                      className="rounded-xl border border-steps-300 bg-steps-50 px-4 py-3 text-sm font-semibold text-gray-800 hover:bg-steps-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
                     >
                       {t["hearingLossExperience.test.continue"]}
                     </button>
@@ -1798,29 +1805,29 @@ export default function HearingLoss() {
                     <button
                       type="button"
                       onClick={() => void cantHearTone()}
-                      className="rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm font-medium text-slate-200 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                      className="rounded-xl border border-surface-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
                     >
                       {t["hearingLossExperience.test.cantHear"]}
                     </button>
                   </div>
 
-                  {toneError && <div className="text-sm text-amber-300">{toneError}</div>}
+                  {toneError && <div className="text-sm text-amber-600">{toneError}</div>}
 
-                  <details className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                    <summary className="cursor-pointer text-sm font-medium text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950">
+                  <details className="rounded-xl border border-surface-300 bg-surface-50 p-4">
+                    <summary className="cursor-pointer text-sm font-medium text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100">
                       {t["hearingLossExperience.guide.title"]}
                     </summary>
-                    <div className="mt-3 text-sm text-slate-400">{t["hearingLossExperience.guide.scale"]}</div>
-                    <div className="mt-2 text-sm text-slate-400">{t["hearingLossExperience.guide.testTips"]}</div>
+                    <div className="mt-3 text-sm text-gray-500">{t["hearingLossExperience.guide.scale"]}</div>
+                    <div className="mt-2 text-sm text-gray-500">{t["hearingLossExperience.guide.testTips"]}</div>
                   </details>
                 </div>
 
-                <div className="sticky bottom-0 rounded-b-2xl border-t border-slate-800 bg-slate-950 px-5 py-4 sm:px-6 sm:py-5">
+                <div className="sticky bottom-0 rounded-b-2xl border-t border-surface-300 bg-surface-50 px-5 py-4 sm:px-6 sm:py-5">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <button
                       type="button"
                       onClick={() => setStage("listen")}
-                      className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                      className="rounded-lg border border-surface-300 px-3 py-2 text-sm hover:bg-surface-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
                     >
                       {t["hearingLossExperience.back"]}
                     </button>
@@ -1831,10 +1838,10 @@ export default function HearingLoss() {
                       disabled={!isTestComplete}
                       aria-disabled={!isTestComplete}
                       className={
-                        "flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 " +
+                        "flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 " +
                         (isTestComplete
-                          ? "border-slate-600 bg-slate-800 text-slate-100 hover:bg-slate-700"
-                          : "border-slate-800 bg-slate-900 text-slate-500 cursor-not-allowed")
+                          ? "border-steps-300 bg-steps-50 text-gray-800 hover:bg-steps-100"
+                          : "border-surface-300 bg-white text-gray-400 cursor-not-allowed")
                       }
                     >
                       <span>{t["hearingLossExperience.skipToResults"]}</span>
@@ -1849,19 +1856,19 @@ export default function HearingLoss() {
               <div className="space-y-5">
                 <div>
                   <div className="text-sm font-semibold">{audiogramTitle}</div>
-                  <div className="mt-1 text-sm text-slate-400">{t["hearingLossExperience.audiogram.body"]}</div>
+                  <div className="mt-1 text-sm text-gray-500">{t["hearingLossExperience.audiogram.body"]}</div>
                 </div>
 
                 {normalizedStage === "audiogram" ? (
-                  <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                    <div className="text-sm font-medium text-slate-200">{t["hearingLossExperience.guide.title"]}</div>
-                    <div className="mt-1 text-sm text-slate-400">{t["hearingLossExperience.guide.audiogramYAxis"]}</div>
+                  <div className="rounded-xl border border-surface-300 bg-surface-50 p-4">
+                    <div className="text-sm font-medium text-gray-700">{t["hearingLossExperience.guide.title"]}</div>
+                    <div className="mt-1 text-sm text-gray-500">{t["hearingLossExperience.guide.audiogramYAxis"]}</div>
                   </div>
                 ) : null}
 
                 {normalizedStage === "audiogram" ? (
-                  <div className="rounded-xl border border-slate-800 bg-slate-950 p-3">
-                    <div className="mb-3 flex flex-wrap items-center gap-4 text-xs text-slate-300">
+                  <div className="rounded-xl border border-surface-300 bg-surface-50 p-3">
+                    <div className="mb-3 flex flex-wrap items-center gap-4 text-xs text-gray-600">
                       <div className="flex items-center gap-2">
                         <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
                           <circle cx="9" cy="9" r="6" fill="#f87171" />
@@ -1887,7 +1894,7 @@ export default function HearingLoss() {
                     <button
                       type="button"
                       onClick={() => setStage("test")}
-                      className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                      className="rounded-lg border border-surface-300 px-3 py-2 text-sm hover:bg-surface-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
                     >
                       {t["hearingLossExperience.back"]}
                     </button>
@@ -1898,7 +1905,7 @@ export default function HearingLoss() {
                           setCompletedLevels((prev) => (prev.includes(activeLevel) ? prev : [...prev, activeLevel]));
                           goToMenu();
                         }}
-                        className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm font-medium hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                        className="rounded-lg border border-surface-300 bg-white px-3 py-2 text-sm font-medium hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
                       >
                         {t["hearingLossExperience.finishLevel"]}
                       </button>
@@ -1906,7 +1913,7 @@ export default function HearingLoss() {
                       <button
                         type="button"
                         onClick={() => setStage("correct")}
-                        className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm font-medium hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                        className="rounded-lg border border-surface-300 bg-white px-3 py-2 text-sm font-medium hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
                       >
                         {t["hearingLossExperience.proceedToCorrection"]}
                       </button>
@@ -1914,8 +1921,8 @@ export default function HearingLoss() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                      <div className="text-sm font-medium text-slate-200">{t["hearingLossExperience.correct.listenAgain"]}</div>
+                    <div className="rounded-xl border border-surface-300 bg-surface-50 p-4">
+                      <div className="text-sm font-medium text-gray-700">{t["hearingLossExperience.correct.listenAgain"]}</div>
                       <div className="mt-3">
                         <div className="space-y-3">
                           {audioKinds.map((kind) => (
@@ -1941,8 +1948,8 @@ export default function HearingLoss() {
                     </div>
 
                     <div className="space-y-4">
-                      <div className="rounded-xl border border-slate-800 bg-slate-950 p-3">
-                        <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-slate-300">
+                      <div className="rounded-xl border border-surface-300 bg-surface-50 p-3">
+                        <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-gray-600">
                           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
                             <circle cx="9" cy="9" r="6" fill="#f87171" />
                           </svg>
@@ -1956,7 +1963,7 @@ export default function HearingLoss() {
                             return analyser ? (
                               <AudioSpectrum analyser={analyser} height={120} />
                             ) : (
-                              <div className="flex h-[120px] items-center justify-center rounded bg-slate-900/40 text-sm text-slate-500">
+                              <div className="flex h-[120px] items-center justify-center rounded bg-surface-200 text-sm text-gray-400">
                                 {t["hearingLossExperience.correct.spectrumPlaceholder"]}
                               </div>
                             );
@@ -1974,11 +1981,11 @@ export default function HearingLoss() {
                                 : t["hearingLossExperience.correct.muteRight"]
                             }
                             className={
-                              "flex items-center justify-center rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 " +
+                              "flex items-center justify-center rounded-lg border border-surface-300 bg-white px-3 py-2 hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 " +
                               (muteAdjustRight ? "opacity-70" : "")
                             }
                           >
-                            <img src={muteAdjustRight ? "/icons/unMuteButton2.png" : "/icons/muteButton2.png"} alt="" className="h-5 w-5" />
+                            <img src={muteAdjustRight ? "/icons/unMuteButton2.png" : "/icons/muteButton2.png"} alt="" className="h-5 w-5 brightness-0" />
                           </button>
 
                           <button
@@ -1988,14 +1995,14 @@ export default function HearingLoss() {
                               for (const p of measuredPointsRight) nextR[p.freqHz] = { ...p };
                               setAdjustedRight(nextR);
                             }}
-                            className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                            className="rounded-lg border border-surface-300 px-3 py-2 text-sm hover:bg-surface-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
                           >
                             {t["hearingLossExperience.correct.resetRight"]}
                           </button>
                         </div>
                       </div>
-                      <div className="rounded-xl border border-slate-800 bg-slate-950 p-3">
-                        <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-slate-300">
+                      <div className="rounded-xl border border-surface-300 bg-surface-50 p-3">
+                        <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-gray-600">
                           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
                             <g stroke="#60a5fa" strokeWidth="2.5" strokeLinecap="round">
                               <line x1="4" y1="4" x2="14" y2="14" />
@@ -2012,7 +2019,7 @@ export default function HearingLoss() {
                             return analyser ? (
                               <AudioSpectrum analyser={analyser} height={120} />
                             ) : (
-                              <div className="flex h-[120px] items-center justify-center rounded bg-slate-900/40 text-sm text-slate-500">
+                              <div className="flex h-[120px] items-center justify-center rounded bg-surface-200 text-sm text-gray-400">
                                 {t["hearingLossExperience.correct.spectrumPlaceholder"]}
                               </div>
                             );
@@ -2030,11 +2037,11 @@ export default function HearingLoss() {
                                 : t["hearingLossExperience.correct.muteLeft"]
                             }
                             className={
-                              "flex items-center justify-center rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 " +
+                              "flex items-center justify-center rounded-lg border border-surface-300 bg-white px-3 py-2 hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 " +
                               (muteAdjustLeft ? "opacity-70" : "")
                             }
                           >
-                            <img src={muteAdjustLeft ? "/icons/unMuteButton2.png" : "/icons/muteButton2.png"} alt="" className="h-5 w-5" />
+                            <img src={muteAdjustLeft ? "/icons/unMuteButton2.png" : "/icons/muteButton2.png"} alt="" className="h-5 w-5 brightness-0" />
                           </button>
 
                           <button
@@ -2044,7 +2051,7 @@ export default function HearingLoss() {
                               for (const p of measuredPointsLeft) nextL[p.freqHz] = { ...p };
                               setAdjustedLeft(nextL);
                             }}
-                            className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                            className="rounded-lg border border-surface-300 px-3 py-2 text-sm hover:bg-surface-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
                           >
                             {t["hearingLossExperience.correct.resetLeft"]}
                           </button>
@@ -2056,7 +2063,7 @@ export default function HearingLoss() {
                       <button
                         type="button"
                         onClick={() => setStage("audiogram")}
-                        className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                        className="rounded-lg border border-surface-300 px-3 py-2 text-sm hover:bg-surface-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
                       >
                         {t["hearingLossExperience.back"]}
                       </button>
@@ -2068,19 +2075,19 @@ export default function HearingLoss() {
                             setCompletedLevels((prev) => (prev.includes(activeLevel) ? prev : [...prev, activeLevel]));
                             goToMenu();
                           }}
-                          className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm font-medium hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                          className="rounded-lg border border-surface-300 bg-white px-3 py-2 text-sm font-medium hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
                         >
                           {t["hearingLossExperience.finishLevel"]}
                         </button>
                       </div>
                     </div>
 
-                    <details className="rounded-xl border border-slate-800 bg-slate-950 p-4">
-                      <summary className="cursor-pointer text-sm font-medium text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950">
+                    <details className="rounded-xl border border-surface-300 bg-surface-50 p-4">
+                      <summary className="cursor-pointer text-sm font-medium text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100">
                         {t["hearingLossExperience.guide.title"]}
                       </summary>
-                      <div className="mt-3 text-sm text-slate-400">{t["hearingLossExperience.guide.adjustRange"]}</div>
-                      <div className="mt-2 text-sm text-slate-400">{t["hearingLossExperience.guide.adjustTips"]}</div>
+                      <div className="mt-3 text-sm text-gray-500">{t["hearingLossExperience.guide.adjustRange"]}</div>
+                      <div className="mt-2 text-sm text-gray-500">{t["hearingLossExperience.guide.adjustTips"]}</div>
                     </details>
                   </div>
                 )}

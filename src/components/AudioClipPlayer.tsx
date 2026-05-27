@@ -168,12 +168,12 @@ export function AudioClipPlayer(props: AudioClipPlayerProps) {
   };
 
   return (
-    <div className={compact ? "rounded-lg border border-slate-800 bg-slate-950 p-2" : "rounded-xl border border-slate-800 bg-slate-950 p-4"}>
+    <div className={compact ? "rounded-lg border border-surface-300 bg-white p-2 shadow-sm" : "rounded-xl border border-surface-300 bg-white p-4 shadow-sm"}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className={compact ? "truncate text-xs font-medium text-slate-200" : "truncate text-sm font-medium text-slate-200"}>{title}</div>
+          <div className={compact ? "truncate text-xs font-medium text-gray-700" : "truncate text-sm font-medium text-gray-700"}>{title}</div>
         </div>
-        <div className="shrink-0 text-xs tabular-nums text-slate-500">{timeText}</div>
+        <div className="shrink-0 text-xs tabular-nums text-gray-400">{timeText}</div>
       </div>
 
       <div className={compact ? "mt-1.5 flex flex-wrap items-center gap-1.5" : "mt-3 flex flex-wrap items-center gap-2"}>
@@ -197,14 +197,14 @@ export function AudioClipPlayer(props: AudioClipPlayerProps) {
         <button
           type="button"
           onClick={togglePlayPause}
-          className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+          className="rounded-lg border border-steps-200 bg-steps-50 px-3 py-2 text-sm text-steps-700 hover:bg-steps-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2"
         >
           {isPlaying ? pauseLabel : playLabel}
         </button>
         <button
           type="button"
           onClick={onStop}
-          className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+          className="rounded-lg border border-surface-300 px-3 py-2 text-sm text-gray-600 hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2"
         >
           {stopLabel}
         </button>

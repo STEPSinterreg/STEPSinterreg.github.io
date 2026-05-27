@@ -9,9 +9,18 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
-        <h1 className="text-xl font-semibold">{t["dashboard_title"]}</h1>
-        <p className="mt-2 max-w-3xl text-sm text-slate-400">{t["dashboard_desc"]}</p>
+      <section className="rounded-2xl border border-surface-300 bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-4">
+          <img
+            src="/steps-art/SVGs/STEPS Logo Purple.svg"
+            alt="STEPS logo"
+            className="hidden h-16 w-auto sm:block"
+          />
+          <div>
+            <h1 className="text-xl font-semibold text-steps-600">{t["dashboard_title"]}</h1>
+            <p className="mt-2 max-w-3xl text-sm text-gray-500">{t["dashboard_desc"]}</p>
+          </div>
+        </div>
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

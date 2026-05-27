@@ -2,4 +2,138 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply bg-surface-100 text-gray-800 antialiased;
+  }
 
+  /* ── Range input styling ─────────────────────────────────── */
+  input[type="range"] {
+    @apply h-2 cursor-pointer appearance-none rounded-full bg-surface-300;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    @apply h-5 w-5 appearance-none rounded-full border-2 border-white bg-steps-600 shadow-md;
+  }
+  input[type="range"]::-moz-range-thumb {
+    @apply h-5 w-5 appearance-none rounded-full border-2 border-white bg-steps-600 shadow-md;
+  }
+  input[type="range"]:focus {
+    @apply outline-none;
+  }
+  input[type="range"]:focus::-webkit-slider-thumb {
+    @apply ring-2 ring-steps-400 ring-offset-2 ring-offset-surface-100;
+  }
+
+  /* ── Scrollbar ───────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { @apply bg-surface-200; }
+  ::-webkit-scrollbar-thumb { @apply rounded-full bg-surface-400; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-steps-300; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+   ══════════════════════════════════════════════════════════════
+   Light purple:  #5A2382 (brand)   → dark-mode primary: #7C3AED
+   Light accents: steps-50..400     → dark-mode: deeper/brighter variants
+   Text accents:  steps-600/700     → dark-mode: #C084FC / #A855F7
+
+   Purple mapping (light → dark):
+     steps-50   #f5f0fa → #1e103a   (tint bg)
+     steps-100  #ebe0f4 → #2d1854   (tint bg)
+     steps-200  #d4bfe6 → #4a1d6b   (borders)
+     steps-300  #b892d4 → #7C3AED   (borders, scrollbar)
+     steps-400  #9b63c0 → #A855F7   (progress bars, rings)
+     steps-600  #5A2382 → #7C3AED   (topbar, button bg)
+     steps-700  #4a1d6b → #6D28D9   (borders, hover)
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Body ──────────────────────────────────────────────────── */
+.dark body {
+  background-color: #020617;
+  color: #e2e8f0;
+}
+
+/* ── Surface backgrounds ───────────────────────────────────── */
+.dark .bg-white          { background-color: #0f172a; }
+.dark .bg-surface-50     { background-color: #020617; }
+.dark .bg-surface-100    { background-color: #020617; }
+.dark .bg-surface-200    { background-color: #1e293b; }
+.dark .bg-surface-300    { background-color: #334155; }
+.dark .bg-surface-400    { background-color: #475569; }
+
+/* ── Purple accent backgrounds ─────────────────────────────── */
+.dark .bg-steps-50       { background-color: #1e103a; }
+.dark .bg-steps-100      { background-color: #2d1854; }
+.dark .bg-steps-300      { background-color: #7C3AED; }
+.dark .bg-steps-400      { background-color: #A855F7; }
+.dark .bg-steps-600      { background-color: #7C3AED; }
+
+/* ── Hover backgrounds ─────────────────────────────────────── */
+.dark .hover\:bg-surface-100:hover  { background-color: #0f172a; }
+.dark .hover\:bg-surface-200:hover  { background-color: #1e293b; }
+.dark .hover\:bg-steps-50:hover     { background-color: #2d1854; }
+.dark .hover\:bg-steps-100:hover    { background-color: #3b2069; }
+.dark .hover\:bg-steps-700:hover    { background-color: #6D28D9; }
+
+/* ── Borders ───────────────────────────────────────────────── */
+.dark .border-surface-300            { border-color: #334155; }
+.dark .border-steps-200              { border-color: #4a1d6b; }
+.dark .border-steps-300              { border-color: #7C3AED; }
+.dark .border-steps-700              { border-color: #6D28D9; }
+.dark .hover\:border-steps-300:hover { border-color: #A855F7; }
+
+/* ── Text: gray scale ──────────────────────────────────────── */
+.dark .text-gray-800     { color: #f1f5f9; }
+.dark .text-gray-700     { color: #e2e8f0; }
+.dark .text-gray-600     { color: #cbd5e1; }
+.dark .text-gray-500     { color: #94a3b8; }
+.dark .text-gray-400     { color: #64748b; }
+
+/* ── Text: purple accent (brighter for dark backgrounds) ──── */
+.dark .text-steps-600    { color: #C084FC; }
+.dark .text-steps-700    { color: #A855F7; }
+
+/* ── Shadows ───────────────────────────────────────────────── */
+.dark .shadow-sm  { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.3); }
+.dark .shadow-md  { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3); }
+.dark .shadow-lg  { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3); }
+
+/* ── Form elements ─────────────────────────────────────────── */
+.dark input[type="range"] {
+  background-color: #334155;
+}
+.dark input[type="range"]::-webkit-slider-thumb {
+  background-color: #A855F7;
+  border-color: #1e293b;
+}
+.dark input[type="range"]::-moz-range-thumb {
+  background-color: #A855F7;
+  border-color: #1e293b;
+}
+.dark select {
+  background-color: #1e293b;
+  border-color: #475569;
+  color: #e2e8f0;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+.dark ::-webkit-scrollbar-track { background-color: #0f172a; }
+.dark ::-webkit-scrollbar-thumb { background-color: #475569; }
+.dark ::-webkit-scrollbar-thumb:hover { background-color: #7C3AED; }
+
+/* ── Focus rings ───────────────────────────────────────────── */
+.dark .focus-visible\:ring-offset-surface-100 {
+  --tw-ring-offset-color: #020617;
+}
+.dark .focus-visible\:ring-steps-400 {
+  --tw-ring-color: #A855F7;
+}
+.dark .ring-steps-400 {
+  --tw-ring-color: #A855F7;
+}
+
+/* ── Icons: invert white→white in dark mode ────────────────── */
+.dark .brightness-0 {
+  filter: brightness(0) invert(1);
+}

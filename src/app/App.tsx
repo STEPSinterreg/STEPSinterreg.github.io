@@ -1,18 +1,20 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import LanguageToggle from "../components/LanguageToggle";
+import ThemeToggle, { SunIcon, MoonIcon, MonitorIcon } from "../components/ThemeToggle";
 import { useEffect, useRef, useState } from "react";
 import { useLocale } from "../i18n/LocaleContext";
+import { useTheme } from "../i18n/ThemeContext";
 import { translations } from "../i18n/translations";
-
-// Developer/testing controls.
 
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const actionsMenuRef = useRef<HTMLDivElement | null>(null);
   const languageMenuRef = useRef<HTMLDivElement | null>(null);
+  const themeMenuRef = useRef<HTMLDivElement | null>(null);
   const isDashboard = location.pathname === "/";
   const isHearingLoss = location.pathname.startsWith("/experiences/hearing-loss");
   const search = new URLSearchParams(location.search);
@@ -21,6 +23,7 @@ export default function App() {
   const isHearingLossExperience = isHearingLoss && search.get("screen") === "experience";
   const showHearingLossDevUnlock = isHearingLossExperience;
   const { locale } = useLocale();
+  const { setting, setSetting } = useTheme();
   const t = translations[locale];
 
   useEffect(() => {
@@ -37,6 +40,7 @@ export default function App() {
   useEffect(() => {
     setActionsMenuOpen(false);
     setLanguageMenuOpen(false);
+    setThemeMenuOpen(false);
   }, [location.pathname, location.search]);
 
   useEffect(() => {
@@ -46,21 +50,20 @@ export default function App() {
 
       if (actionsMenuRef.current?.contains(target)) return;
       if (languageMenuRef.current?.contains(target)) return;
+      if (themeMenuRef.current?.contains(target)) return;
 
       setActionsMenuOpen(false);
       setLanguageMenuOpen(false);
+      setThemeMenuOpen(false);
     };
 
     document.addEventListener("pointerdown", handlePointerDown);
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, []);
 
-  // Full-height bar button: parent uses items-stretch + fixed min-height so every
-  // button fills the entire topbar. No rounded corners, no gap between siblings.
-  const topBarButtonClass = "inline-flex h-full items-center justify-center px-3 text-sm text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-slate-400";
+  const topBarButtonClass = "inline-flex h-full items-center justify-center px-3 text-sm text-white/80 transition-colors hover:bg-white/[0.12] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/50";
 
-  // Dev-unlock still gets a faint amber tint so it stays visually distinct.
-  const devButtonClass = "inline-flex h-full items-center justify-center px-3 text-sm text-amber-400 transition-colors hover:bg-amber-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-500";
+  const devButtonClass = "inline-flex h-full items-center justify-center px-3 text-sm text-amber-300 transition-colors hover:bg-amber-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-400";
 
   const headerActions = (
     <>
@@ -77,7 +80,6 @@ export default function App() {
         </button>
       )}
 
-      {/* Compare / Experience sub-screens → back to hearing landing */}
       {(isHearingLossCompare || isHearingLossExperience) && (
         <button
           className={topBarButtonClass}
@@ -90,7 +92,6 @@ export default function App() {
         </button>
       )}
 
-      {/* Hearing landing + all other non-dashboard, non-level pages → back to dashboard */}
       {!isDashboard && !isHearingLossLevel && !isHearingLossCompare && !isHearingLossExperience && (
         <button
           className={topBarButtonClass}
@@ -103,7 +104,6 @@ export default function App() {
         </button>
       )}
 
-      {/* Level → back to experience menu */}
       {isHearingLossLevel && (
         <button
           className={topBarButtonClass}
@@ -120,30 +120,45 @@ export default function App() {
 
   const showHeaderActions = !isDashboard || isHearingLossLevel;
 
+  const themeOptions: { key: "light" | "dark" | "system"; label: string; Icon: React.FC<{ size?: number }> }[] = [
+    { key: "light", label: "Light", Icon: SunIcon },
+    { key: "dark", label: "Dark", Icon: MoonIcon },
+    { key: "system", label: "System", Icon: MonitorIcon },
+  ];
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <header className="sticky top-0 z-10 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
+    <div className="min-h-screen bg-surface-100 text-gray-800">
+      <header className="sticky top-0 z-10 border-b border-steps-700 bg-steps-600 shadow-lg">
         <div className="mx-auto flex max-w-6xl min-h-14 items-stretch justify-between px-4">
-          {/* Logo + title — full-height, no rounded, navigates home on click */}
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="flex items-center gap-3 px-2 -ml-2 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-slate-400"
+            className="flex items-center gap-3 px-2 -ml-2 transition-colors hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/50"
           >
-            <img src={`/icons/${locale}.png`} alt={t["common.logoAlt"]} className="h-8 w-8 rounded-xl object-cover" />
-            <div className="text-left">
-              <div className="text-sm font-semibold leading-4">{t["app_name"]}</div>
-              <div className="text-xs text-slate-400">{t["app_subtitle"]}</div>
-            </div>
+            <img
+              src="/steps-art/SVGs/STEPS Logo Just Mascot.svg"
+              alt="STEPS"
+              className="h-10 w-auto"
+            />
           </button>
 
           <div className="relative flex items-stretch gap-0">
+            <ThemeToggle
+              buttonClass={topBarButtonClass}
+              open={themeMenuOpen}
+              onOpenChange={(open) => {
+                setThemeMenuOpen(open);
+                if (open) { setLanguageMenuOpen(false); setActionsMenuOpen(false); }
+              }}
+              containerRef={themeMenuRef}
+            />
+
             <LanguageToggle
               buttonClass={topBarButtonClass}
               open={languageMenuOpen}
               onOpenChange={(open) => {
                 setLanguageMenuOpen(open);
-                if (open) setActionsMenuOpen(false);
+                if (open) { setActionsMenuOpen(false); setThemeMenuOpen(false); }
               }}
               containerRef={languageMenuRef}
             />
@@ -155,14 +170,14 @@ export default function App() {
                 <div className="sm:hidden" ref={actionsMenuRef}>
                   <button
                     type="button"
-                    className="inline-flex h-full w-11 items-center justify-center text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-slate-400"
+                    className="inline-flex h-full w-11 items-center justify-center text-white/80 transition-colors hover:bg-white/[0.12] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/50"
                     aria-label={t["app.openActionsMenu"]}
                     aria-haspopup="menu"
                     aria-expanded={actionsMenuOpen}
                     onClick={() => {
                       setActionsMenuOpen((open) => {
                         const next = !open;
-                        if (next) setLanguageMenuOpen(false);
+                        if (next) { setLanguageMenuOpen(false); setThemeMenuOpen(false); }
                         return next;
                       });
                     }}
@@ -175,11 +190,33 @@ export default function App() {
                   </button>
 
                   {actionsMenuOpen && (
-                    <div className="absolute right-0 top-full z-20 mt-2 w-48 rounded-xl border border-slate-800 bg-slate-900 p-2 shadow-lg">
-                      <div className="flex flex-col gap-2" role="menu" aria-label={t["app.actionsMenuTitle"]}>
+                    <div className="absolute right-0 top-full z-20 mt-2 w-48 rounded-xl border border-surface-300 bg-white p-2 shadow-lg">
+                      <div className="flex flex-col gap-1" role="menu" aria-label={t["app.actionsMenuTitle"]}>
+                        {/* Theme picker in mobile menu */}
+                        <div className="px-2 pb-1 pt-1 text-xs font-semibold uppercase tracking-wide text-gray-400">Theme</div>
+                        {themeOptions.map((opt) => (
+                          <button
+                            key={opt.key}
+                            className={`flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm text-gray-700 hover:bg-steps-50 ${
+                              setting === opt.key ? "bg-steps-50 text-steps-700" : ""
+                            }`}
+                            onClick={() => {
+                              setSetting(opt.key);
+                              setActionsMenuOpen(false);
+                            }}
+                          >
+                            <opt.Icon size={16} />
+                            <span className="flex-1">{opt.label}</span>
+                            {setting === opt.key && <span className="text-xs text-steps-600">✓</span>}
+                          </button>
+                        ))}
+
+                        {/* Divider before nav actions */}
+                        <div className="my-1 border-t border-surface-300" />
+
                         {!isDashboard && !isHearingLossLevel && showHearingLossDevUnlock && (
                           <button
-                            className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-slate-800"
+                            className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm text-gray-700 hover:bg-steps-50"
                             title={t["app.devUnlockAllTitle"]}
                             onClick={() => {
                               window.dispatchEvent(new CustomEvent("hearingLoss:unlockAll"));
@@ -192,7 +229,7 @@ export default function App() {
 
                         {(isHearingLossCompare || isHearingLossExperience) && (
                           <button
-                            className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-slate-800"
+                            className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm text-gray-700 hover:bg-steps-50"
                             onClick={() => {
                               navigate("/experiences/hearing-loss");
                               setActionsMenuOpen(false);
@@ -204,7 +241,7 @@ export default function App() {
 
                         {!isDashboard && !isHearingLossLevel && !isHearingLossCompare && !isHearingLossExperience && (
                           <button
-                            className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-slate-800"
+                            className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm text-gray-700 hover:bg-steps-50"
                             onClick={() => {
                               navigate("/");
                               setActionsMenuOpen(false);
@@ -216,7 +253,7 @@ export default function App() {
 
                         {isHearingLossLevel && (
                           <button
-                            className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-slate-800"
+                            className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm text-gray-700 hover:bg-steps-50"
                             onClick={() => {
                               navigate("/experiences/hearing-loss?screen=experience");
                               setActionsMenuOpen(false);

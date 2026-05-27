@@ -36,8 +36,8 @@ export default function LabeledSlider({
   const activeBars = Math.max(0, Math.min(bars, Math.floor(value01 * bars) + 1));
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-sm font-medium">
-        {label} <span className="text-xs text-slate-400">{display}{unit ? ` ${unit}` : ""}</span>
+      <label htmlFor={id} className="text-sm font-medium text-gray-700">
+        {label} <span className="text-xs text-gray-400">{display}{unit ? ` ${unit}` : ""}</span>
       </label>
 
       {showDirectionBars ? (
@@ -48,7 +48,7 @@ export default function LabeledSlider({
               key={i}
               className={
                 "flex-1 rounded-sm " +
-                (i < activeBars ? "bg-slate-500/90" : "bg-slate-700/70")
+                (i < activeBars ? "bg-steps-400/80" : "bg-surface-300/70")
               }
               style={{ height: `${25 + (i / Math.max(1, bars - 1)) * 75}%` }}
             />

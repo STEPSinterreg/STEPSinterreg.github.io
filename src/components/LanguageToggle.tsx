@@ -20,7 +20,7 @@ export default function LanguageToggle({ buttonClass, open, onOpenChange, contai
   ];
 
   const current = options.find((o) => o.key === locale) ?? options[0];
-  const triggerClass = buttonClass ?? "inline-flex h-10 items-center gap-2 rounded-xl border border-slate-700 px-3 text-sm hover:bg-slate-900";
+  const triggerClass = buttonClass ?? "inline-flex h-10 items-center gap-2 rounded-xl border border-surface-300 px-3 text-sm hover:bg-surface-200";
 
   return (
     <div className="relative" ref={containerRef}>
@@ -34,7 +34,7 @@ export default function LanguageToggle({ buttonClass, open, onOpenChange, contai
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-40 rounded-xl border border-slate-800 bg-slate-900 p-2 shadow-lg">
+        <div className="absolute right-0 mt-2 w-40 rounded-xl border border-surface-300 bg-white p-2 shadow-lg">
           <ul role="listbox" className="space-y-1">
             {options.map((opt) => (
               <li key={opt.key}>
@@ -43,13 +43,13 @@ export default function LanguageToggle({ buttonClass, open, onOpenChange, contai
                     setLocale(opt.key);
                     onOpenChange(false);
                   }}
-                  className={`flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-slate-800 ${
-                    locale === opt.key ? "bg-slate-800" : ""
+                  className={`flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-gray-700 hover:bg-steps-50 ${
+                    locale === opt.key ? "bg-steps-50 text-steps-700" : ""
                   }`}
                 >
                   <img src={opt.src} alt={opt.label} className="h-4 w-6 rounded-sm object-cover" />
                   <span className="flex-1 text-left">{opt.label}</span>
-                  {locale === opt.key && <span className="text-xs text-slate-300">✓</span>}
+                  {locale === opt.key && <span className="text-xs text-steps-600">✓</span>}
                 </button>
               </li>
             ))}
