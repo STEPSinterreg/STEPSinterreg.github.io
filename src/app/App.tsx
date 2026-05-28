@@ -136,7 +136,7 @@ export default function App() {
             className="flex items-center gap-3 px-2 -ml-2 transition-colors hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/50"
           >
             <img
-              src="/steps-art/SVGs/STEPS Logo Just Mascot.svg"
+              src="/steps-art/SVGs/STEPS Logo White.svg"
               alt="STEPS"
               className="h-10 w-auto"
             />

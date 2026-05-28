@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AudioSpectrum from "../../components/AudioSpectrum";
 import LabeledSlider from "../../components/LabeledSlider";
-import { AudioClipPlayer } from "../../components/AudioClipPlayer";
+import UnifiedAudioPlayer, { type SoundOption } from "../../components/UnifiedAudioPlayer";
 import { engine } from "../../audio/engine";
 import { AUDIOGRAM_FREQUENCIES_HZ, defaultCalibrationProfile } from "../../audio/calibration";
 import { hashStringToSeed, hearingLossProfileById, sampleHearingLossProfile } from "../../audio/hearingLossProfiles";
@@ -113,9 +113,6 @@ type LevelStage = "listen" | "test" | "audiogram" | "correct";
 // Debug/education default: make loss effects clearly audible.
 // This scales EQ/filter gains for loss profiles so HF/LF damping is obvious.
 const SEVERE_LOSS_GAIN_SCALE = 1.8;
-
-const TASKS_PDF_HREF = "/hearing-loss/tasks/Opgaver.pdf";
-const TASKS_DOCX_HREF = "/hearing-loss/tasks/Opgaver.docx";
 
 const toSevereProfile = (profile: HearingProfile, opts?: { enabled?: boolean }): HearingProfile => {
   if (!opts?.enabled) return profile;
@@ -732,11 +729,6 @@ export default function HearingLoss() {
     birds: toPublicAudioSrc(pickRandom(AUDIO_FILES.birds)),
   }));
 
-  const speechJessicaAudioRef = useRef<HTMLAudioElement | null>(null);
-  const speechMarkAudioRef = useRef<HTMLAudioElement | null>(null);
-  const streetAudioRef = useRef<HTMLAudioElement | null>(null);
-  const birdsAudioRef = useRef<HTMLAudioElement | null>(null);
-
   const [playingKind, setPlayingKind] = useState<AudioKind | null>(null);
 
   useEffect(() => {
@@ -749,91 +741,44 @@ export default function HearingLoss() {
     setPlayingKind(null);
   }, [activeLevel]);
 
-  const getAudioRef = (kind: AudioKind) => {
-    switch (kind) {
-      case "speechJessica":
-        return speechJessicaAudioRef;
-      case "speechMark":
-        return speechMarkAudioRef;
-      case "street":
-        return streetAudioRef;
-      case "birds":
-        return birdsAudioRef;
-    }
-  };
-
-  const pauseAllOtherAudio = (except: AudioKind) => {
-    for (const kind of audioKinds) {
-      if (kind === except) continue;
-      getAudioRef(kind).current?.pause();
-    }
-  };
-
-  const pauseAllAudio = () => {
-    for (const kind of audioKinds) {
-      getAudioRef(kind).current?.pause();
-    }
-    setPlayingKind(null);
-  };
-
   useEffect(() => {
     const prev = prevScreenRef.current;
     prevScreenRef.current = screen;
 
     // When leaving the level view (back to menu/overview), stop any playback
-    // but keep progress in-memory.
+    // but keep progress in-memory. The unified player's <audio> unmounts with
+    // the level UI, so engine.stop() is enough to kill any active routing.
     if (prev === "level" && screen !== "level") {
-      pauseAllAudio();
       engine.stop();
       toneSeqRef.current += 1;
       toneInFlightRef.current = false;
       setTonePlaying(false);
+      setPlayingKind(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen]);
 
-  const applyHearingLossProcessing = async (el: HTMLAudioElement) => {
-    await engine.attachMediaElement(el);
-    if (sampledProfileAppliedRef.current) {
-      await engine.setProfile(sampledProfileAppliedRef.current, 100);
-    }
-  };
+  // --- Unified audio player config (used in listen + correct stages) ---
+  const unifiedSounds: SoundOption[] = audioKinds.map((kind) => ({
+    key: kind,
+    label: t[`hearingLossExperience.audioKind.${kind}`],
+    loop: AUDIO_LOOP[kind],
+  }));
 
-  const playAudio = async (kind: AudioKind) => {
-    try {
-      const el = getAudioRef(kind).current;
-      if (!el) return;
+  const unifiedSrcByKey: Record<string, string> = audioKinds.reduce(
+    (acc, kind) => ({ ...acc, [kind]: audioSrcByKind[kind] }),
+    {}
+  );
 
-      pauseAllOtherAudio(kind);
-
-      // Set early so correction routing can react before playback starts.
-      setPlayingKind(kind);
-
-      if (activeLevel !== "intro") {
-        await applyHearingLossProcessing(el);
+  const onUnifiedBeforePlay = async (el: HTMLAudioElement, soundKey: string) => {
+    setPlayingKind(soundKey as AudioKind);
+    if (activeLevel !== "intro") {
+      await engine.attachMediaElement(el);
+      if (sampledProfileAppliedRef.current) {
+        await engine.setProfile(sampledProfileAppliedRef.current, 100);
       }
-
-      await el.play();
-    } catch {
-      setPlayingKind(null);
-      // Visual-only: ignore.
     }
   };
-
-  const pauseAudio = (kind: AudioKind) => {
-    getAudioRef(kind).current?.pause();
-    setPlayingKind((prev) => (prev === kind ? null : prev));
-  };
-
-  const stopAudio = (kind: AudioKind) => {
-    const el = getAudioRef(kind).current;
-    if (!el) return;
-    el.pause();
-    el.currentTime = 0;
-    setPlayingKind((prev) => (prev === kind ? null : prev));
-  };
-
-  const onNativeAudioPause = (kind: AudioKind) => setPlayingKind((prev) => (prev === kind ? null : prev));
 
   // --- Audiogram chart (draggable points vertical-only) ---
 
@@ -1537,25 +1482,6 @@ export default function HearingLoss() {
           </section>
 
           <section className="rounded-2xl border border-surface-300 bg-white shadow-sm p-5 sm:p-6">
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <a
-                href={TASKS_PDF_HREF}
-                download
-                className="inline-flex w-full items-center justify-center rounded-xl border border-surface-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
-              >
-                {t["hearingLossExperience.tasks.downloadPdf"]}
-              </a>
-              <a
-                href={TASKS_DOCX_HREF}
-                download
-                className="inline-flex w-full items-center justify-center rounded-xl border border-surface-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100"
-              >
-                {t["hearingLossExperience.tasks.downloadDocx"]}
-              </a>
-            </div>
-          </section>
-
-          <section className="rounded-2xl border border-surface-300 bg-white shadow-sm p-5 sm:p-6">
             <div className="space-y-3">
               <button
                 type="button"
@@ -1652,26 +1578,16 @@ export default function HearingLoss() {
                   <div className="mt-2 text-sm text-gray-500">{t["hearingLossExperience.guide.listenTips"]}</div>
                 </details>
 
-                <div className="space-y-3">
-                  {audioKinds.map((kind) => (
-                    <AudioClipPlayer
-                      key={kind}
-                      title={t[`hearingLossExperience.audioKind.${kind}`]}
-                      audioRef={getAudioRef(kind)}
-                      ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
-                      src={audioSrcByKind[kind]}
-                      loop={AUDIO_LOOP[kind]}
-                      playLabel={t["play"]}
-                      pauseLabel={t["pause"]}
-                      stopLabel={t["stop"]}
-                      onSeekStart={() => pauseAllAudio()}
-                      onPlay={() => void playAudio(kind)}
-                      onPause={() => pauseAudio(kind)}
-                      onStop={() => stopAudio(kind)}
-                      onEnded={() => onNativeAudioPause(kind)}
-                    />
-                  ))}
-                </div>
+                <UnifiedAudioPlayer
+                  sounds={unifiedSounds}
+                  audioSrcByKey={unifiedSrcByKey}
+                  onBeforePlay={onUnifiedBeforePlay}
+                  playLabel={t["play"]}
+                  pauseLabel={t["pause"]}
+                  stopLabel={t["stop"]}
+                  soundLabel={t["hearingLossExperience.unifiedPlayer.soundLabel"]}
+                  ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
+                />
 
                 <div className="flex justify-end">
                   <button
@@ -1762,13 +1678,29 @@ export default function HearingLoss() {
                         });
                       }}
                       aria-pressed={muted}
-                      aria-label={t["hearingLossExperience.test.mute"]}
+                      aria-label={muted ? t["hearingLossExperience.test.resumeTone"] : t["hearingLossExperience.test.pauseTone"]}
                       className={
-                        "flex items-center justify-center rounded-lg border border-surface-300 bg-white px-3 py-2 hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 " +
-                        (muted ? "opacity-70" : "")
+                        "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 " +
+                        (muted
+                          ? "border-amber-400 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-500/60 dark:bg-amber-500/10 dark:text-amber-300"
+                          : "border-surface-300 bg-white text-gray-700 hover:bg-surface-200")
                       }
                     >
-                      <img src={muted ? "/icons/unMuteButton2.png" : "/icons/muteButton2.png"} alt="" className="h-5 w-5 brightness-0" />
+                      {muted ? (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      ) : (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <rect x="6" y="5" width="4" height="14" rx="1" />
+                          <rect x="14" y="5" width="4" height="14" rx="1" />
+                        </svg>
+                      )}
+                      <span>
+                        {muted
+                          ? t["hearingLossExperience.test.resumeTone"]
+                          : t["hearingLossExperience.test.pauseTone"]}
+                      </span>
                     </button>
 
                     <button
@@ -1792,6 +1724,17 @@ export default function HearingLoss() {
                       {t["hearingLossExperience.test.clear"]}
                     </button>
                   </div>
+
+                  {muted && (
+                    <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-500/60 dark:bg-amber-500/10 dark:text-amber-300">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="mt-0.5 shrink-0">
+                        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                      </svg>
+                      <span>{t["hearingLossExperience.test.toneMutedWarning"]}</span>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     <button
@@ -1921,30 +1864,18 @@ export default function HearingLoss() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="rounded-xl border border-surface-300 bg-surface-50 p-4">
-                      <div className="text-sm font-medium text-gray-700">{t["hearingLossExperience.correct.listenAgain"]}</div>
-                      <div className="mt-3">
-                        <div className="space-y-3">
-                          {audioKinds.map((kind) => (
-                            <AudioClipPlayer
-                              key={kind}
-                              title={t[`hearingLossExperience.audioKind.${kind}`]}
-                              audioRef={getAudioRef(kind)}
-                              ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
-                              src={audioSrcByKind[kind]}
-                              loop={AUDIO_LOOP[kind]}
-                              playLabel={t["play"]}
-                              pauseLabel={t["pause"]}
-                              stopLabel={t["stop"]}
-                              onSeekStart={() => pauseAllAudio()}
-                              onPlay={() => void playAudio(kind)}
-                              onPause={() => pauseAudio(kind)}
-                              onStop={() => stopAudio(kind)}
-                              onEnded={() => onNativeAudioPause(kind)}
-                            />
-                          ))}
-                        </div>
-                      </div>
+                    <div>
+                      <div className="mb-3 text-sm font-medium text-gray-700">{t["hearingLossExperience.correct.listenAgain"]}</div>
+                      <UnifiedAudioPlayer
+                        sounds={unifiedSounds}
+                        audioSrcByKey={unifiedSrcByKey}
+                        onBeforePlay={onUnifiedBeforePlay}
+                        playLabel={t["play"]}
+                        pauseLabel={t["pause"]}
+                        stopLabel={t["stop"]}
+                        soundLabel={t["hearingLossExperience.unifiedPlayer.soundLabel"]}
+                        ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
+                      />
                     </div>
 
                     <div className="space-y-4">

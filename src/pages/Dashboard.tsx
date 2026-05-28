@@ -9,12 +9,12 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-surface-300 bg-white p-6 shadow-sm">
-        <div className="flex items-center gap-4">
+      <section className="rounded-2xl border border-surface-300 bg-white p-6 shadow-sm sm:p-8">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
           <img
-            src="/steps-art/SVGs/STEPS Logo Purple.svg"
-            alt="STEPS logo"
-            className="hidden h-16 w-auto sm:block"
+            src="/steps-art/SVGs/STEPS Logo Full Text Purple.svg"
+            alt="STEPS"
+            className="h-24 w-auto sm:h-28 dark:brightness-0 dark:invert"
           />
           <div>
             <h1 className="text-xl font-semibold text-steps-600">{t["dashboard_title"]}</h1>

@@ -1,12 +1,13 @@
-import { useEffect, useImperativeHandle, useRef, useState } from "react";
-import { AudioClipPlayer } from "../../components/AudioClipPlayer";
+import { useEffect, useRef, useState } from "react";
+import UnifiedAudioPlayer, { type SoundOption, type ProfileOption } from "../../components/UnifiedAudioPlayer";
+import AudioSpectrum from "../../components/AudioSpectrum";
 import { engine } from "../../audio/engine";
 import { hashStringToSeed, hearingLossProfileById, sampleHearingLossProfile } from "../../audio/hearingLossProfiles";
 import type { HearingProfile } from "../../audio/profiles";
 import { useLocale } from "../../i18n/LocaleContext";
 import { translations } from "../../i18n/translations";
 
-// ── Audio file catalogue (same as main HearingLoss experience) ────────────────
+// ── Audio file catalogue ─────────────────────────────────────────────────────
 
 type AudioKind = "speechJessica" | "speechMark" | "street" | "birds";
 
@@ -34,16 +35,16 @@ const AUDIO_KINDS: readonly AudioKind[] = ["speechJessica", "speechMark", "stree
 const toPublicAudioSrc = (fileName: string) => `/hearing-loss/audios/${encodeURIComponent(fileName)}`;
 const pickRandom = <T,>(items: readonly T[]): T => items[Math.floor(Math.random() * items.length)]!;
 
-// ── Profiles shown in the compare grid ───────────────────────────────────────
+// ── Profiles shown as pills ─────────────────────────────────────────────────
 
 const COMPARE_PROFILES = [
-  { profileId: "normal",            titleKey: "hearingLossExperience.compare.profile.normal" },
+  { profileId: "normal",             titleKey: "hearingLossExperience.compare.profile.normal" },
   { profileId: "low_frequency_loss", titleKey: "hearingLossExperience.level.low_frequency_loss.title" },
-  { profileId: "hf_sloping_age",    titleKey: "hearingLossExperience.level.hf_sloping_age.title" },
-  { profileId: "mute",              titleKey: "hearingLossExperience.level.deafness.title" },
+  { profileId: "hf_sloping_age",     titleKey: "hearingLossExperience.level.hf_sloping_age.title" },
+  { profileId: "mute",               titleKey: "hearingLossExperience.level.deafness.title" },
 ] as const;
 
-// ── Severe-loss scaling (same logic as main HearingLoss experience) ───────────
+// ── Severe-loss scaling ──────────────────────────────────────────────────────
 
 const SEVERE_LOSS_GAIN_SCALE = 1.8;
 
@@ -74,136 +75,12 @@ function toSevereProfile(profile: HearingProfile): HearingProfile {
   };
 }
 
-// ── CompareCard ───────────────────────────────────────────────────────────────
-
-type CompareCardHandle = {
-  pauseAll: () => void;
-};
-
-type CompareCardProps = {
-  ref?: React.RefObject<CompareCardHandle | null>;
-  profileId: string;
-  title: string;
-  audioSrcByKind: Record<AudioKind, string>;
-  audioLabelByKind: Record<AudioKind, string>;
-  playLabel: string;
-  pauseLabel: string;
-  stopLabel: string;
-  audioPlayerLabel: string;
-  onBeforePlay: (kind: AudioKind, el: HTMLAudioElement) => Promise<void>;
-};
-
-function CompareCard({
-  ref,
-  profileId: _profileId,
-  title,
-  audioSrcByKind,
-  audioLabelByKind,
-  playLabel,
-  pauseLabel,
-  stopLabel,
-  audioPlayerLabel,
-  onBeforePlay,
-}: CompareCardProps) {
-  const speechJessicaRef = useRef<HTMLAudioElement | null>(null);
-  const speechMarkRef    = useRef<HTMLAudioElement | null>(null);
-  const streetRef        = useRef<HTMLAudioElement | null>(null);
-  const birdsRef         = useRef<HTMLAudioElement | null>(null);
-
-  const [playingKind, setPlayingKind] = useState<AudioKind | null>(null);
-
-  const getAudioRef = (kind: AudioKind): React.RefObject<HTMLAudioElement | null> => {
-    switch (kind) {
-      case "speechJessica": return speechJessicaRef;
-      case "speechMark":    return speechMarkRef;
-      case "street":        return streetRef;
-      case "birds":         return birdsRef;
-    }
-  };
-
-  const pauseAllLocal = () => {
-    for (const kind of AUDIO_KINDS) {
-      getAudioRef(kind).current?.pause();
-    }
-    setPlayingKind(null);
-  };
-
-  useImperativeHandle(ref, () => ({ pauseAll: pauseAllLocal }));
-
-  const playAudio = async (kind: AudioKind) => {
-    try {
-      const el = getAudioRef(kind).current;
-      if (!el) return;
-
-      // Pause sibling audio kinds within this card.
-      for (const k of AUDIO_KINDS) {
-        if (k !== kind) getAudioRef(k).current?.pause();
-      }
-
-      setPlayingKind(kind);
-      // Let the parent pause other cards and set the engine profile.
-      await onBeforePlay(kind, el);
-      await el.play();
-    } catch {
-      setPlayingKind(null);
-    }
-  };
-
-  const pauseAudio = (kind: AudioKind) => {
-    getAudioRef(kind).current?.pause();
-    setPlayingKind((prev) => (prev === kind ? null : prev));
-  };
-
-  const stopAudio = (kind: AudioKind) => {
-    const el = getAudioRef(kind).current;
-    if (!el) return;
-    el.pause();
-    el.currentTime = 0;
-    setPlayingKind((prev) => (prev === kind ? null : prev));
-  };
-
-  const onNativeAudioPause = (kind: AudioKind) =>
-    setPlayingKind((prev) => (prev === kind ? null : prev));
-
-  // Suppress unused-variable warning: playingKind is kept to force re-render
-  void playingKind;
-
-  return (
-    <div className="rounded-2xl border border-surface-300 bg-white p-3 shadow-sm sm:p-4">
-      <h2 className="mb-2 text-sm font-semibold text-gray-800">{title}</h2>
-      <div className="space-y-1.5">
-        {AUDIO_KINDS.map((kind) => (
-          <AudioClipPlayer
-            key={kind}
-            title={audioLabelByKind[kind]}
-            audioRef={getAudioRef(kind)}
-            ariaLabel={audioPlayerLabel}
-            src={audioSrcByKind[kind]}
-            loop={AUDIO_LOOP[kind]}
-            compact
-            playLabel={playLabel}
-            pauseLabel={pauseLabel}
-            stopLabel={stopLabel}
-            onSeekStart={pauseAllLocal}
-            onPlay={() => void playAudio(kind)}
-            onPause={() => pauseAudio(kind)}
-            onStop={() => stopAudio(kind)}
-            onEnded={() => onNativeAudioPause(kind)}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ── HearingLossCompare ────────────────────────────────────────────────────────
+// ── HearingLossCompare ──────────────────────────────────────────────────────
 
 export function HearingLossCompare() {
   const { locale } = useLocale();
   const t = translations[locale];
 
-  // Pick one random file per audio kind upfront; same file across all cards for
-  // a fair side-by-side comparison.
   const [audioSrcByKind] = useState<Record<AudioKind, string>>(() => ({
     speechJessica: toPublicAudioSrc(pickRandom(AUDIO_FILES.speechJessica)),
     speechMark:    toPublicAudioSrc(pickRandom(AUDIO_FILES.speechMark)),
@@ -211,12 +88,6 @@ export function HearingLossCompare() {
     birds:         toPublicAudioSrc(pickRandom(AUDIO_FILES.birds)),
   }));
 
-  // One ref per card, keyed by profileId.
-  const cardRefs = useRef<Record<string, React.RefObject<CompareCardHandle | null>>>(
-    Object.fromEntries(COMPARE_PROFILES.map((p) => [p.profileId, { current: null }]))
-  );
-
-  // Pre-sample profiles at stable seeds so they don't change between renders.
   const sampledProfiles = useRef<Record<string, HearingProfile | null>>({});
   useEffect(() => {
     for (const { profileId } of COMPARE_PROFILES) {
@@ -224,63 +95,111 @@ export function HearingLossCompare() {
       if (!def) { sampledProfiles.current[profileId] = null; continue; }
       const seed = hashStringToSeed(`compare_${profileId}`);
       const base = sampleHearingLossProfile(def, { seed });
-      // Apply severe scaling so the difference is clearly audible, but skip
-      // "normal" (no filters) and "mute" (already fully silent).
       const shouldScale = profileId !== "normal" && profileId !== "mute";
       sampledProfiles.current[profileId] = shouldScale ? toSevereProfile(base) : base;
     }
   }, []);
 
-  // Stop all engine audio when this view unmounts (user navigates away).
   useEffect(() => () => { engine.stop(); }, []);
 
-  const handleBeforePlay = async (profileId: string, _kind: AudioKind, el: HTMLAudioElement) => {
-    // Pause all other cards first.
-    for (const { profileId: pid } of COMPARE_PROFILES) {
-      if (pid !== profileId) {
-        cardRefs.current[pid]?.current?.pauseAll();
-      }
-    }
-    // Route this element through the engine with the card's profile.
+  const [selectedProfile, setSelectedProfile] = useState<string>(COMPARE_PROFILES[0].profileId);
+  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
+
+  const lastAudioElRef = useRef<HTMLAudioElement | null>(null);
+
+  const applyEngineProfile = async (el: HTMLAudioElement, profileId: string) => {
+    lastAudioElRef.current = el;
     await engine.attachMediaElement(el);
     const profile = sampledProfiles.current[profileId];
     if (profile) {
       await engine.setProfile(profile, 100);
     }
+    // Engine analyser is created lazily on first attach. Pull it into state so
+    // AudioSpectrum picks it up.
+    const a = engine.getAnalyser();
+    if (a) setAnalyser(a);
   };
 
-  const audioLabelByKind: Record<AudioKind, string> = {
-    speechJessica: t["hearingLossExperience.audioKind.speechJessica"],
-    speechMark:    t["hearingLossExperience.audioKind.speechMark"],
-    street:        t["hearingLossExperience.audioKind.street"],
-    birds:         t["hearingLossExperience.audioKind.birds"],
+  const onBeforePlay = async (el: HTMLAudioElement) => {
+    await applyEngineProfile(el, selectedProfile);
   };
+
+  const onProfileChange = (nextProfileId: string) => {
+    setSelectedProfile(nextProfileId);
+    const el = lastAudioElRef.current;
+    if (el && !el.paused) {
+      void applyEngineProfile(el, nextProfileId);
+    }
+  };
+
+  const sounds: SoundOption[] = AUDIO_KINDS.map((kind) => ({
+    key: kind,
+    label: t[`hearingLossExperience.audioKind.${kind}`],
+    loop: AUDIO_LOOP[kind],
+  }));
+
+  const srcByKey: Record<string, string> = AUDIO_KINDS.reduce(
+    (acc, kind) => ({ ...acc, [kind]: audioSrcByKind[kind] }),
+    {}
+  );
+
+  const profiles: ProfileOption[] = COMPARE_PROFILES.map(({ profileId, titleKey }) => ({
+    key: profileId,
+    label: t[titleKey],
+  }));
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-surface-300 bg-white p-5 shadow-sm sm:p-6">
-        <h1 className="text-xl font-semibold tracking-tight text-steps-600 sm:text-2xl">
-          {t["hearingLossExperience.compare.title"]}
-        </h1>
-        <p className="mt-2 max-w-3xl text-sm text-gray-500">{t["hearingLossExperience.compare.body"]}</p>
+      {/* Hero — inviting headline + tagline */}
+      <section className="overflow-hidden rounded-2xl border border-surface-300 bg-white shadow-sm">
+        <div className="border-b border-surface-300 bg-steps-50 px-6 py-3 dark:bg-steps-100">
+          <div className="text-xs font-semibold uppercase tracking-widest text-steps-600">
+            {t["hearingLossExperience.compare.tagline"]}
+          </div>
+        </div>
+        <div className="p-6 sm:p-8">
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-800 sm:text-3xl">
+            {t["hearingLossExperience.compare.title"]}
+          </h1>
+          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-gray-500 sm:text-base">
+            {t["hearingLossExperience.compare.body"]}
+          </p>
+        </div>
       </section>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {COMPARE_PROFILES.map(({ profileId, titleKey }) => (
-          <CompareCard
-            key={profileId}
-            ref={cardRefs.current[profileId]}
-            profileId={profileId}
-            title={t[titleKey]}
-            audioSrcByKind={audioSrcByKind}
-            audioLabelByKind={audioLabelByKind}
-            playLabel={t["play"]}
-            pauseLabel={t["pause"]}
-            stopLabel={t["stop"]}
-            audioPlayerLabel={t["hearingLossExperience.audioPlayerLabel"]}
-            onBeforePlay={(kind, el) => handleBeforePlay(profileId, kind, el)}
-          />
-        ))}
+      {/* The player itself */}
+      <UnifiedAudioPlayer
+        sounds={sounds}
+        audioSrcByKey={srcByKey}
+        profiles={profiles}
+        selectedProfile={selectedProfile}
+        onProfileChange={onProfileChange}
+        onBeforePlay={onBeforePlay}
+        playLabel={t["play"]}
+        pauseLabel={t["pause"]}
+        stopLabel={t["stop"]}
+        soundLabel={t["hearingLossExperience.unifiedPlayer.soundLabel"]}
+        profileLabel={t["hearingLossExperience.unifiedPlayer.profileLabel"]}
+        ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
+      />
+
+      {/* Live audio wave visualiser */}
+      <section className="rounded-2xl border border-surface-300 bg-white p-4 shadow-sm sm:p-5">
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          {t["hearingLossExperience.unifiedPlayer.waveLabel"]}
+        </div>
+        {analyser ? (
+          <AudioSpectrum analyser={analyser} height={140} />
+        ) : (
+          <div className="flex h-[140px] items-center justify-center rounded-lg border border-dashed border-surface-300 bg-surface-50 text-sm text-gray-400">
+            {t["hearingLossExperience.unifiedPlayer.wavePlaceholder"]}
+          </div>
+        )}
+      </section>
+
+      {/* Hint footer */}
+      <div className="rounded-xl border border-steps-200 bg-steps-50 px-4 py-3 text-sm text-gray-700">
+        {t["hearingLossExperience.compare.hint"]}
       </div>
     </div>
   );
