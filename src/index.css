@@ -34,9 +34,8 @@
 /* ══════════════════════════════════════════════════════════════
    DARK MODE OVERRIDES
    ══════════════════════════════════════════════════════════════
-   Light purple:  #5A2382 (brand)   → dark-mode primary: #7C3AED
-   Light accents: steps-50..400     → dark-mode: deeper/brighter variants
-   Text accents:  steps-600/700     → dark-mode: #C084FC / #A855F7
+   Brand purple (#5A2382) stays on the topbar in both modes.
+   Accents brighten in dark mode for contrast on slate-900 backgrounds.
 
    Purple mapping (light → dark):
      steps-50   #f5f0fa → #1e103a   (tint bg)
@@ -44,8 +43,10 @@
      steps-200  #d4bfe6 → #4a1d6b   (borders)
      steps-300  #b892d4 → #7C3AED   (borders, scrollbar)
      steps-400  #9b63c0 → #A855F7   (progress bars, rings)
-     steps-600  #5A2382 → #7C3AED   (topbar, button bg)
-     steps-700  #4a1d6b → #6D28D9   (borders, hover)
+     steps-600  #5A2382 → #5A2382   (topbar/button bg — KEEP BRAND)
+     steps-700  #4a1d6b → #3a1755   (topbar border — subtle)
+   Hover on bg-steps-600 brightens to #7C3AED for visibility.
+   Text accents:   text-steps-600 → #C084FC,   text-steps-700 → #A855F7
    ══════════════════════════════════════════════════════════════ */
 
 /* ── Body ──────────────────────────────────────────────────── */
@@ -67,20 +68,20 @@
 .dark .bg-steps-100      { background-color: #2d1854; }
 .dark .bg-steps-300      { background-color: #7C3AED; }
 .dark .bg-steps-400      { background-color: #A855F7; }
-.dark .bg-steps-600      { background-color: #7C3AED; }
+.dark .bg-steps-600      { background-color: #5A2382; }  /* topbar/buttons: brand purple */
 
 /* ── Hover backgrounds ─────────────────────────────────────── */
 .dark .hover\:bg-surface-100:hover  { background-color: #0f172a; }
 .dark .hover\:bg-surface-200:hover  { background-color: #1e293b; }
 .dark .hover\:bg-steps-50:hover     { background-color: #2d1854; }
 .dark .hover\:bg-steps-100:hover    { background-color: #3b2069; }
-.dark .hover\:bg-steps-700:hover    { background-color: #6D28D9; }
+.dark .hover\:bg-steps-700:hover    { background-color: #7C3AED; }  /* brighten on hover */
 
 /* ── Borders ───────────────────────────────────────────────── */
 .dark .border-surface-300            { border-color: #334155; }
 .dark .border-steps-200              { border-color: #4a1d6b; }
 .dark .border-steps-300              { border-color: #7C3AED; }
-.dark .border-steps-700              { border-color: #6D28D9; }
+.dark .border-steps-700              { border-color: #3a1755; }  /* darker than topbar */
 .dark .hover\:border-steps-300:hover { border-color: #A855F7; }
 
 /* ── Text: gray scale ──────────────────────────────────────── */
