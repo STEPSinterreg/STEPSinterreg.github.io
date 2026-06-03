@@ -266,21 +266,17 @@ export function HearingLossCompare() {
       </section>
 
       {/* Step 2 — Audio player */}
-      <section>
-        <div className="mb-2 px-1 text-xs font-semibold uppercase tracking-widest text-gray-500">
-          {t["hearingLossExperience.compare.step2Label"]}
-        </div>
-        <UnifiedAudioPlayer
-          sounds={sounds}
-          audioSrcByKey={srcByKey}
-          onBeforePlay={onBeforePlay}
-          playLabel={t["play"]}
-          pauseLabel={t["pause"]}
-          stopLabel={t["stop"]}
-          soundLabel={t["hearingLossExperience.unifiedPlayer.soundLabel"]}
-          ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
-        />
-      </section>
+      <UnifiedAudioPlayer
+        sounds={sounds}
+        audioSrcByKey={srcByKey}
+        onBeforePlay={onBeforePlay}
+        playLabel={t["play"]}
+        pauseLabel={t["pause"]}
+        stopLabel={t["stop"]}
+        soundLabel={t["hearingLossExperience.unifiedPlayer.soundLabel"]}
+        headerLabel={t["hearingLossExperience.compare.step2Label"]}
+        ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
+      />
 
       {/* Live spectrum visualiser */}
       <section className="rounded-2xl border border-surface-300 bg-white p-4 shadow-sm sm:p-5">

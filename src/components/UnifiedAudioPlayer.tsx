@@ -37,6 +37,7 @@ type Props = {
   stopLabel: string;
   soundLabel: string;
   profileLabel?: string;
+  headerLabel?: string;
   ariaLabel?: string;
 };
 
@@ -57,6 +58,7 @@ export default function UnifiedAudioPlayer({
   stopLabel,
   soundLabel,
   profileLabel,
+  headerLabel,
   ariaLabel,
 }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -234,6 +236,11 @@ export default function UnifiedAudioPlayer({
 
   return (
     <div className="rounded-2xl border border-surface-300 bg-white p-4 shadow-sm sm:p-5">
+      {headerLabel && (
+        <div className="mb-4 text-xs font-semibold uppercase tracking-widest text-gray-500">
+          {headerLabel}
+        </div>
+      )}
       {/* Header: current sound + time */}
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
