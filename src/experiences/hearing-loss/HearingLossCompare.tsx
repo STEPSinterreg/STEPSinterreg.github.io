@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import UnifiedAudioPlayer, { type SoundOption, type ProfileOption } from "../../components/UnifiedAudioPlayer";
+import UnifiedAudioPlayer, { type SoundOption } from "../../components/UnifiedAudioPlayer";
 import AudioSpectrum from "../../components/AudioSpectrum";
 import { engine } from "../../audio/engine";
 import { hashStringToSeed, hearingLossProfileById, sampleHearingLossProfile } from "../../audio/hearingLossProfiles";
@@ -35,13 +35,35 @@ const AUDIO_KINDS: readonly AudioKind[] = ["speechJessica", "speechMark", "stree
 const toPublicAudioSrc = (fileName: string) => `/hearing-loss/audios/${encodeURIComponent(fileName)}`;
 const pickRandom = <T,>(items: readonly T[]): T => items[Math.floor(Math.random() * items.length)]!;
 
-// ── Profiles shown as pills ─────────────────────────────────────────────────
+// ── Compare profiles ─────────────────────────────────────────────────────────
+
+type CurveType = "flat" | "lowFreqLoss" | "hfSloping" | "mute";
 
 const COMPARE_PROFILES = [
-  { profileId: "normal",             titleKey: "hearingLossExperience.compare.profile.normal" },
-  { profileId: "low_frequency_loss", titleKey: "hearingLossExperience.level.low_frequency_loss.title" },
-  { profileId: "hf_sloping_age",     titleKey: "hearingLossExperience.level.hf_sloping_age.title" },
-  { profileId: "mute",               titleKey: "hearingLossExperience.level.deafness.title" },
+  {
+    profileId: "normal",
+    titleKey: "hearingLossExperience.compare.profile.normal",
+    descKey: "hearingLossExperience.compare.profile.normal.desc",
+    curveType: "flat" as CurveType,
+  },
+  {
+    profileId: "low_frequency_loss",
+    titleKey: "hearingLossExperience.level.low_frequency_loss.title",
+    descKey: "hearingLossExperience.compare.profile.low_frequency_loss.desc",
+    curveType: "lowFreqLoss" as CurveType,
+  },
+  {
+    profileId: "hf_sloping_age",
+    titleKey: "hearingLossExperience.level.hf_sloping_age.title",
+    descKey: "hearingLossExperience.compare.profile.hf_sloping_age.desc",
+    curveType: "hfSloping" as CurveType,
+  },
+  {
+    profileId: "mute",
+    titleKey: "hearingLossExperience.level.deafness.title",
+    descKey: "hearingLossExperience.compare.profile.mute.desc",
+    curveType: "mute" as CurveType,
+  },
 ] as const;
 
 // ── Severe-loss scaling ──────────────────────────────────────────────────────
@@ -73,6 +95,30 @@ function toSevereProfile(profile: HearingProfile): HearingProfile {
       },
     },
   };
+}
+
+// ── Frequency curve SVG ──────────────────────────────────────────────────────
+
+// Each curve shows a stylised frequency response: left = low freq, right = high freq,
+// top = more sound gets through, bottom = more attenuation.
+const CURVE_PATHS: Record<CurveType, string> = {
+  flat:        "M 0,10 L 100,10",
+  lowFreqLoss: "M 0,34 C 22,34 38,10 58,10 L 100,10",
+  hfSloping:   "M 0,10 L 42,10 C 58,10 72,34 100,34",
+  mute:        "M 0,38 L 100,38",
+};
+
+function FrequencyCurve({ type, active }: { type: CurveType; active: boolean }) {
+  const stroke = active ? "#7c3aed" : "#9ca3af";
+  const areafill = active ? "rgba(124,58,237,0.10)" : "rgba(156,163,175,0.07)";
+  const d = CURVE_PATHS[type];
+
+  return (
+    <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="h-full w-full" aria-hidden="true">
+      <path d={`${d} L 100,40 L 0,40 Z`} fill={areafill} />
+      <path d={d} fill="none" stroke={stroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
 // ── HearingLossCompare ──────────────────────────────────────────────────────
@@ -114,8 +160,6 @@ export function HearingLossCompare() {
     if (profile) {
       await engine.setProfile(profile, 100);
     }
-    // Engine analyser is created lazily on first attach. Pull it into state so
-    // AudioSpectrum picks it up.
     const a = engine.getAnalyser();
     if (a) setAnalyser(a);
   };
@@ -124,7 +168,7 @@ export function HearingLossCompare() {
     await applyEngineProfile(el, selectedProfile);
   };
 
-  const onProfileChange = (nextProfileId: string) => {
+  const onProfileCardClick = (nextProfileId: string) => {
     setSelectedProfile(nextProfileId);
     const el = lastAudioElRef.current;
     if (el && !el.paused) {
@@ -143,14 +187,9 @@ export function HearingLossCompare() {
     {}
   );
 
-  const profiles: ProfileOption[] = COMPARE_PROFILES.map(({ profileId, titleKey }) => ({
-    key: profileId,
-    label: t[titleKey],
-  }));
-
   return (
-    <div className="space-y-6">
-      {/* Hero — inviting headline + tagline */}
+    <div className="space-y-5">
+      {/* Hero */}
       <section className="overflow-hidden rounded-2xl border border-surface-300 bg-white shadow-sm">
         <div className="border-b border-surface-300 bg-steps-50 px-6 py-3 dark:bg-steps-100">
           <div className="text-xs font-semibold uppercase tracking-widest text-steps-600">
@@ -167,23 +206,83 @@ export function HearingLossCompare() {
         </div>
       </section>
 
-      {/* The player itself */}
-      <UnifiedAudioPlayer
-        sounds={sounds}
-        audioSrcByKey={srcByKey}
-        profiles={profiles}
-        selectedProfile={selectedProfile}
-        onProfileChange={onProfileChange}
-        onBeforePlay={onBeforePlay}
-        playLabel={t["play"]}
-        pauseLabel={t["pause"]}
-        stopLabel={t["stop"]}
-        soundLabel={t["hearingLossExperience.unifiedPlayer.soundLabel"]}
-        profileLabel={t["hearingLossExperience.unifiedPlayer.profileLabel"]}
-        ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
-      />
+      {/* Step 1 — Profile cards */}
+      <section className="rounded-2xl border border-surface-300 bg-white p-5 shadow-sm">
+        <div className="mb-4 text-xs font-semibold uppercase tracking-widest text-gray-500">
+          {t["hearingLossExperience.compare.step1Label"]}
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {COMPARE_PROFILES.map(({ profileId, titleKey, descKey, curveType }) => {
+            const active = selectedProfile === profileId;
+            return (
+              <button
+                key={profileId}
+                type="button"
+                onClick={() => onProfileCardClick(profileId)}
+                aria-pressed={active}
+                className={[
+                  "relative flex flex-col gap-3 rounded-xl border-2 p-4 text-left transition",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+                  active
+                    ? "border-steps-400 bg-steps-50/70 shadow-sm"
+                    : "border-surface-300 bg-white hover:border-steps-200 hover:bg-surface-50",
+                ].join(" ")}
+              >
+                {/* Frequency response curve */}
+                <div className="h-12 w-full overflow-hidden rounded-lg bg-surface-100">
+                  <FrequencyCurve type={curveType} active={active} />
+                </div>
 
-      {/* Live audio wave visualiser */}
+                {/* Name + active checkmark */}
+                <div className="flex items-start justify-between gap-2">
+                  <span className={`text-sm font-semibold leading-snug ${active ? "text-steps-700" : "text-gray-800"}`}>
+                    {t[titleKey]}
+                  </span>
+                  {active && (
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="mt-0.5 shrink-0 text-steps-500"
+                      aria-hidden="true"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="m9 12 2 2 4-4" />
+                    </svg>
+                  )}
+                </div>
+
+                {/* Short description */}
+                <p className="text-xs leading-relaxed text-gray-500">{t[descKey]}</p>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Step 2 — Audio player */}
+      <section>
+        <div className="mb-2 px-1 text-xs font-semibold uppercase tracking-widest text-gray-500">
+          {t["hearingLossExperience.compare.step2Label"]}
+        </div>
+        <UnifiedAudioPlayer
+          sounds={sounds}
+          audioSrcByKey={srcByKey}
+          onBeforePlay={onBeforePlay}
+          playLabel={t["play"]}
+          pauseLabel={t["pause"]}
+          stopLabel={t["stop"]}
+          soundLabel={t["hearingLossExperience.unifiedPlayer.soundLabel"]}
+          ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
+        />
+      </section>
+
+      {/* Live spectrum visualiser */}
       <section className="rounded-2xl border border-surface-300 bg-white p-4 shadow-sm sm:p-5">
         <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
           {t["hearingLossExperience.unifiedPlayer.waveLabel"]}
