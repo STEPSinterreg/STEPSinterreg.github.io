@@ -10,7 +10,7 @@ import { translations } from "../../i18n/translations";
 // ── Audio file catalogue ─────────────────────────────────────────────────────
 
 type AudioFileKind = "speechJessica" | "speechMark" | "street" | "birds";
-type AudioKind = AudioFileKind | "microphone";
+type AudioKind = AudioFileKind;
 
 const AUDIO_FILES: Record<AudioFileKind, readonly string[]> = {
   speechJessica: ["Speech Jessica 1 - Not Looping.mp3", "Speech Jessica 2 - Not Looping.mp3"],
@@ -32,7 +32,7 @@ const AUDIO_LOOP: Record<AudioFileKind, boolean> = {
 };
 
 const AUDIO_FILE_KINDS: readonly AudioFileKind[] = ["speechJessica", "speechMark", "street", "birds"];
-const AUDIO_KINDS: readonly AudioKind[] = ["speechJessica", "speechMark", "street", "birds", "microphone"];
+const AUDIO_KINDS: readonly AudioKind[] = ["speechJessica", "speechMark", "street", "birds"];
 
 const toPublicAudioSrc = (fileName: string) => `/hearing-loss/audios/${encodeURIComponent(fileName)}`;
 const pickRandom = <T,>(items: readonly T[]): T => items[Math.floor(Math.random() * items.length)]!;
@@ -225,8 +225,7 @@ export function HearingLossCompare() {
   const sounds: SoundOption[] = AUDIO_KINDS.map((kind) => ({
     key: kind,
     label: t[`hearingLossExperience.audioKind.${kind}`],
-    loop: kind === "microphone" ? false : AUDIO_LOOP[kind],
-    source: kind === "microphone" ? "microphone" : "audio",
+    loop: AUDIO_LOOP[kind],
   }));
 
   const srcByKey: Record<string, string> = AUDIO_FILE_KINDS.reduce(
@@ -323,6 +322,9 @@ export function HearingLossCompare() {
         pauseLabel={t["pause"]}
         stopLabel={t["stop"]}
         soundLabel={t["hearingLossExperience.unifiedPlayer.soundLabel"]}
+        microphoneLabel={t["hearingLossExperience.microphone.label"]}
+        startMicrophoneLabel={t["hearingLossExperience.live.start"]}
+        stopMicrophoneLabel={t["hearingLossExperience.live.stop"]}
         headerLabel={t["hearingLossExperience.compare.step2Label"]}
         ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
       />

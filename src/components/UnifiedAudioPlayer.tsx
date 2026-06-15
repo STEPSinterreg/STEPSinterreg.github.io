@@ -14,7 +14,6 @@ export type SoundOption = {
   key: string;
   label: string;
   loop?: boolean;
-  source?: "audio" | "microphone";
 };
 
 export type ProfileOption = {
@@ -32,13 +31,16 @@ type Props = {
 
   /** Called before play() so parent can attach to engine + set profile. */
   onBeforePlay?: (audioEl: HTMLAudioElement, soundKey: string) => Promise<void> | void;
-  onStartMicrophone?: (soundKey: string) => Promise<void> | void;
-  onStopMicrophone?: (soundKey: string) => Promise<void> | void;
+  onStartMicrophone?: () => Promise<void> | void;
+  onStopMicrophone?: () => Promise<void> | void;
 
   playLabel: string;
   pauseLabel: string;
   stopLabel: string;
   soundLabel: string;
+  microphoneLabel?: string;
+  startMicrophoneLabel?: string;
+  stopMicrophoneLabel?: string;
   profileLabel?: string;
   headerLabel?: string;
   ariaLabel?: string;
@@ -62,6 +64,9 @@ export default function UnifiedAudioPlayer({
   pauseLabel,
   stopLabel,
   soundLabel,
+  microphoneLabel,
+  startMicrophoneLabel,
+  stopMicrophoneLabel,
   profileLabel,
   headerLabel,
   ariaLabel,
@@ -74,6 +79,8 @@ export default function UnifiedAudioPlayer({
   const [duration, setDuration] = useState(0);
   const [seeking, setSeeking] = useState(false);
   const [seekPct, setSeekPct] = useState<number | null>(null);
+  const [microphoneActive, setMicrophoneActive] = useState(false);
+  const [microphoneStarting, setMicrophoneStarting] = useState(false);
 
   const selectedSound = useMemo(
     () => sounds.find((s) => s.key === selectedKey) ?? sounds[0],
@@ -82,7 +89,7 @@ export default function UnifiedAudioPlayer({
 
   const src = selectedSound ? audioSrcByKey[selectedSound.key] : "";
   const loop = !!selectedSound?.loop;
-  const isMicrophone = selectedSound?.source === "microphone";
+  const hasMicrophone = !!onStartMicrophone && !!onStopMicrophone;
 
   // Reset playback when audio source actually changes.
   useEffect(() => {
@@ -92,7 +99,7 @@ export default function UnifiedAudioPlayer({
     setDuration(0);
     setIsPlaying(false);
     try { el.pause(); el.currentTime = 0; } catch { /* ignore */ }
-  }, [src, isMicrophone]);
+  }, [src]);
 
   useEffect(() => {
     const el = audioRef.current;
@@ -129,31 +136,15 @@ export default function UnifiedAudioPlayer({
 
   const togglePlay = async () => {
     const el = audioRef.current;
-    if (isMicrophone && selectedSound) {
-      try {
-        if (isPlaying) {
-          await onStopMicrophone?.(selectedSound.key);
-          setIsPlaying(false);
-        } else {
-          await onStartMicrophone?.(selectedSound.key);
-          setIsPlaying(true);
-          setPlayedKeys((prev) => {
-            if (prev.has(selectedKey)) return prev;
-            const next = new Set(prev);
-            next.add(selectedKey);
-            return next;
-          });
-        }
-      } catch {
-        setIsPlaying(false);
-      }
-      return;
-    }
     if (!el) return;
     if (isPlaying) {
       el.pause();
     } else {
       try {
+        if (microphoneActive) {
+          await onStopMicrophone?.();
+          setMicrophoneActive(false);
+        }
         if (onBeforePlay && selectedSound) {
           await onBeforePlay(el, selectedSound.key);
         }
@@ -172,12 +163,6 @@ export default function UnifiedAudioPlayer({
 
   const handleStop = () => {
     const el = audioRef.current;
-    if (isMicrophone && selectedSound) {
-      void onStopMicrophone?.(selectedSound.key);
-      setIsPlaying(false);
-      setCurrentTime(0);
-      return;
-    }
     if (!el) return;
     try { el.pause(); el.currentTime = 0; } catch { /* ignore */ }
     setCurrentTime(0);
@@ -187,34 +172,16 @@ export default function UnifiedAudioPlayer({
     if (key === selectedKey) return;
     const el = audioRef.current;
     const wasPlaying = isPlaying;
-    const wasMicrophone = selectedSound?.source === "microphone";
     if (el) {
       try { el.pause(); el.currentTime = 0; } catch { /* ignore */ }
     }
-    if (wasMicrophone && selectedSound) {
-      void onStopMicrophone?.(selectedSound.key);
-      setIsPlaying(false);
+    if (microphoneActive) {
+      void onStopMicrophone?.();
+      setMicrophoneActive(false);
     }
     setSelectedKey(key);
     if (wasPlaying) {
       requestAnimationFrame(async () => {
-        const nextSound = sounds.find((s) => s.key === key);
-        if (nextSound?.source === "microphone") {
-          try {
-            await onStartMicrophone?.(key);
-            setIsPlaying(true);
-            setPlayedKeys((prev) => {
-              if (prev.has(key)) return prev;
-              const n = new Set(prev);
-              n.add(key);
-              return n;
-            });
-          } catch {
-            setIsPlaying(false);
-          }
-          return;
-        }
-
         const next = audioRef.current;
         if (!next) return;
         try {
@@ -249,14 +216,14 @@ export default function UnifiedAudioPlayer({
   };
 
   const displayedTime = useMemo(() => {
-    if (isMicrophone || !seeking || seekPct === null || duration <= 0) return currentTime;
+    if (!seeking || seekPct === null || duration <= 0) return currentTime;
     return duration * clamp01(seekPct / 1000);
-  }, [currentTime, duration, isMicrophone, seeking, seekPct]);
+  }, [currentTime, duration, seeking, seekPct]);
 
   const progress0to1000 = useMemo(() => {
-    if (isMicrophone || duration <= 0) return 0;
+    if (duration <= 0) return 0;
     return clamp((currentTime / duration) * 1000, 0, 1000);
-  }, [currentTime, duration, isMicrophone]);
+  }, [currentTime, duration]);
 
   const sliderValue = seeking && seekPct !== null ? seekPct : progress0to1000;
 
@@ -286,9 +253,32 @@ export default function UnifiedAudioPlayer({
     void togglePlayAfterSeek();
   };
 
-  const timeText = isMicrophone && isPlaying
-    ? "Live"
-    : `${formatTime(displayedTime)} / ${duration > 0 ? formatTime(duration) : "--:--"}`;
+  const toggleMicrophone = async () => {
+    if (!hasMicrophone || microphoneStarting) return;
+    const el = audioRef.current;
+
+    if (microphoneActive) {
+      await onStopMicrophone?.();
+      setMicrophoneActive(false);
+      return;
+    }
+
+    setMicrophoneStarting(true);
+    try {
+      if (el && !el.paused) {
+        el.pause();
+        setIsPlaying(false);
+      }
+      await onStartMicrophone?.();
+      setMicrophoneActive(true);
+    } catch {
+      setMicrophoneActive(false);
+    } finally {
+      setMicrophoneStarting(false);
+    }
+  };
+
+  const timeText = `${formatTime(displayedTime)} / ${duration > 0 ? formatTime(duration) : "--:--"}`;
 
   return (
     <div className="rounded-2xl border border-surface-300 bg-white p-4 shadow-sm sm:p-5">
@@ -315,7 +305,7 @@ export default function UnifiedAudioPlayer({
           max={1000}
           step={1}
           value={Math.round(sliderValue)}
-          disabled={isMicrophone || duration <= 0}
+          disabled={duration <= 0}
           onPointerDown={beginSeek}
           onPointerUp={endSeek}
           onChange={(e) => setSeekPct(Number(e.target.value))}
@@ -380,6 +370,39 @@ export default function UnifiedAudioPlayer({
           })}
         </div>
       </div>
+
+      {hasMicrophone && (
+        <div className="mt-4 rounded-xl border border-surface-300 bg-surface-50 p-3">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+            {microphoneLabel}
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={toggleMicrophone}
+              aria-pressed={microphoneActive}
+              disabled={microphoneStarting}
+              className={
+                "inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 disabled:cursor-not-allowed disabled:opacity-60 " +
+                (microphoneActive
+                  ? "border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
+                  : "border-steps-300 bg-steps-50 text-gray-800 hover:bg-steps-100")
+              }
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3Z" />
+                <path d="M19 11a7 7 0 0 1-14 0" />
+                <path d="M12 18v3" />
+                <path d="M8 21h8" />
+              </svg>
+              <span>{microphoneActive ? stopMicrophoneLabel : startMicrophoneLabel}</span>
+            </button>
+            {microphoneActive && (
+              <span className="text-sm font-medium text-amber-800">Live</span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Profile picker pills (Compare only) */}
       {profiles && profiles.length > 0 && (

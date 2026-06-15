@@ -156,6 +156,7 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.unifiedPlayer.profileLabel": "Høreprofil",
     "hearingLossExperience.unifiedPlayer.waveLabel": "Lydbølge",
     "hearingLossExperience.unifiedPlayer.wavePlaceholder": "Tryk afspil for at se lydbølgen",
+    "hearingLossExperience.microphone.label": "Live input",
 
     "hearingLossExperience.tasks.downloadPdf": "Hent Opgaver (pdf)",
     "hearingLossExperience.tasks.downloadDocx": "Hent Opgaver (docx)",
@@ -425,6 +426,7 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.unifiedPlayer.profileLabel": "Hörprofil",
     "hearingLossExperience.unifiedPlayer.waveLabel": "Schallwelle",
     "hearingLossExperience.unifiedPlayer.wavePlaceholder": "Drücken Sie Abspielen, um die Schallwelle zu sehen",
+    "hearingLossExperience.microphone.label": "Live-Eingang",
 
     "hearingLossExperience.tasks.downloadPdf": "Aufgaben herunterladen (PDF)",
     "hearingLossExperience.tasks.downloadDocx": "Aufgaben herunterladen (DOCX)",
@@ -694,6 +696,7 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.unifiedPlayer.profileLabel": "Hearing profile",
     "hearingLossExperience.unifiedPlayer.waveLabel": "Sound wave",
     "hearingLossExperience.unifiedPlayer.wavePlaceholder": "Press play to see the sound wave",
+    "hearingLossExperience.microphone.label": "Live input",
 
     "hearingLossExperience.tasks.downloadPdf": "Download tasks (PDF)",
     "hearingLossExperience.tasks.downloadDocx": "Download tasks (DOCX)",

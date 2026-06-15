@@ -785,7 +785,7 @@ export default function HearingLoss() {
 
   // --- Multi audio players (visual-first) ---
   type AudioFileKind = "speechJessica" | "speechMark" | "street" | "birds";
-  type AudioKind = AudioFileKind | "microphone";
+  type AudioKind = AudioFileKind;
 
   const AUDIO_FILES: Record<AudioFileKind, readonly string[]> = {
     speechJessica: ["Speech Jessica 1 - Not Looping.mp3", "Speech Jessica 2 - Not Looping.mp3"],
@@ -807,7 +807,7 @@ export default function HearingLoss() {
   };
 
   const audioFileKinds: readonly AudioFileKind[] = ["speechJessica", "speechMark", "street", "birds"];
-  const audioKinds: readonly AudioKind[] = ["speechJessica", "speechMark", "street", "birds", "microphone"];
+  const audioKinds: readonly AudioKind[] = ["speechJessica", "speechMark", "street", "birds"];
   const toPublicAudioSrc = (fileName: string) => `/hearing-loss/audios/${encodeURIComponent(fileName)}`;
   const pickRandom = <T,>(items: readonly T[]) => items[Math.floor(Math.random() * items.length)];
 
@@ -851,8 +851,7 @@ export default function HearingLoss() {
   const unifiedSounds: SoundOption[] = audioKinds.map((kind) => ({
     key: kind,
     label: t[`hearingLossExperience.audioKind.${kind}`],
-    loop: kind === "microphone" ? false : AUDIO_LOOP[kind],
-    source: kind === "microphone" ? "microphone" : "audio",
+    loop: AUDIO_LOOP[kind],
   }));
 
   const unifiedSrcByKey: Record<string, string> = audioFileKinds.reduce(
@@ -862,7 +861,6 @@ export default function HearingLoss() {
 
   const onUnifiedBeforePlay = async (el: HTMLAudioElement, soundKey: string) => {
     setPlayingKind(soundKey as AudioKind);
-    if (soundKey === "microphone") return;
     if (activeLevel !== "intro") {
       await engine.attachMediaElement(el);
       if (sampledProfileAppliedRef.current) {
@@ -871,8 +869,8 @@ export default function HearingLoss() {
     }
   };
 
-  const startUnifiedMicrophone = async (soundKey: string) => {
-    setPlayingKind(soundKey as AudioKind);
+  const startUnifiedMicrophone = async () => {
+    setPlayingKind(null);
     setLiveError(null);
 
     if (!navigator.mediaDevices?.getUserMedia) {
@@ -1811,6 +1809,9 @@ export default function HearingLoss() {
                   pauseLabel={t["pause"]}
                   stopLabel={t["stop"]}
                   soundLabel={t["hearingLossExperience.unifiedPlayer.soundLabel"]}
+                  microphoneLabel={t["hearingLossExperience.microphone.label"]}
+                  startMicrophoneLabel={t["hearingLossExperience.live.start"]}
+                  stopMicrophoneLabel={t["hearingLossExperience.live.stop"]}
                   ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
                 />
                 {liveError && (
@@ -2106,6 +2107,9 @@ export default function HearingLoss() {
                         pauseLabel={t["pause"]}
                         stopLabel={t["stop"]}
                         soundLabel={t["hearingLossExperience.unifiedPlayer.soundLabel"]}
+                        microphoneLabel={t["hearingLossExperience.microphone.label"]}
+                        startMicrophoneLabel={t["hearingLossExperience.live.start"]}
+                        stopMicrophoneLabel={t["hearingLossExperience.live.stop"]}
                         ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
                       />
                       {liveError && (
