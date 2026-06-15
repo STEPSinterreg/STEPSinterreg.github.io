@@ -107,8 +107,32 @@ const LEVELS = [
   },
 ] as const;
 
+const LIVE_PROFILES = [
+  {
+    id: "normal",
+    titleKey: "hearingLossExperience.compare.profile.normal",
+    subtitleKey: "hearingLossExperience.compare.profile.normal.desc",
+  },
+  {
+    id: "low_frequency_loss",
+    titleKey: "hearingLossExperience.level.low_frequency_loss.title",
+    subtitleKey: "hearingLossExperience.compare.profile.low_frequency_loss.desc",
+  },
+  {
+    id: "hf_sloping_age",
+    titleKey: "hearingLossExperience.level.hf_sloping_age.title",
+    subtitleKey: "hearingLossExperience.compare.profile.hf_sloping_age.desc",
+  },
+  {
+    id: "speech_in_noise",
+    titleKey: "hearingLossExperience.level.speech_in_noise.title",
+    subtitleKey: "hearingLossExperience.level.speech_in_noise.subtitle",
+  },
+] as const;
+
 type LevelId = (typeof LEVELS)[number]["id"];
 type LevelStage = "listen" | "test" | "audiogram" | "correct";
+type LiveProfileId = (typeof LIVE_PROFILES)[number]["id"];
 
 // Debug/education default: make loss effects clearly audible.
 // This scales EQ/filter gains for loss profiles so HF/LF damping is obvious.
@@ -204,6 +228,16 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
+function buildLiveProfile(profileId: LiveProfileId): HearingProfile | null {
+  const def = hearingLossProfileById[profileId];
+  if (!def) return null;
+
+  const seed = hashStringToSeed(`live_${profileId}`);
+  const base = sampleHearingLossProfile(def, { seed });
+  const shouldScale = profileId !== "normal";
+  return toSevereProfile(base, { enabled: shouldScale });
+}
+
 export default function HearingLoss() {
   const { locale } = useLocale();
   const { resolved: theme } = useTheme();
@@ -229,6 +263,7 @@ export default function HearingLoss() {
     screenParam === "level"      ? "level"      :
     screenParam === "experience" ? "experience" :
     screenParam === "compare"    ? "compare"    :
+    screenParam === "live"       ? "live"       :
     "landing";
 
   const levelParam = (searchParams.get("level") ?? "") as LevelId;
@@ -246,6 +281,9 @@ export default function HearingLoss() {
   const normalizedStage: LevelStage = stagesForLevel.includes(activeStage) ? activeStage : "listen";
 
   const [completedLevels, setCompletedLevels] = useState<LevelId[]>([]);
+  const [liveProfileId, setLiveProfileId] = useState<LiveProfileId>("hf_sloping_age");
+  const [liveStatus, setLiveStatus] = useState<"idle" | "starting" | "running" | "error">("idle");
+  const [liveError, setLiveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -261,8 +299,18 @@ export default function HearingLoss() {
     };
   }, []);
 
+  useEffect(() => {
+    if (screen === "live") return;
+    if (liveStatus !== "idle") {
+      engine.stop();
+      setLiveStatus("idle");
+    }
+  }, [liveStatus, screen]);
+
   const goToExperienceMenu = () => setSearchParams({ screen: "experience" });
   const goToCompare = () => setSearchParams({ screen: "compare" });
+  const goToLiveMode = () => setSearchParams({ screen: "live" });
+  const goToLanding = () => setSearchParams({});
 
   // Used in the level-complete buttons.
   const goToMenu = goToExperienceMenu;
@@ -330,6 +378,13 @@ export default function HearingLoss() {
     sampledProfileAppliedRef.current = applied;
     void engine.setProfile(applied, 100);
   }, [activeMeta.id, activeMeta.profileId, normalizedStage]);
+
+  useEffect(() => {
+    if (screen !== "live" || liveStatus !== "running") return;
+    const profile = buildLiveProfile(liveProfileId);
+    if (!profile) return;
+    void engine.setProfile(profile, 100);
+  }, [liveProfileId, liveStatus, screen]);
 
   // --- Audiometry (R-App user-operated) ---
   const calibration = defaultCalibrationProfile;
@@ -474,6 +529,39 @@ export default function HearingLoss() {
         toneInFlightRef.current = false;
       }
     }
+  };
+
+  const startLiveMonitoring = async () => {
+    setLiveError(null);
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setLiveStatus("error");
+      setLiveError(t["hearingLossExperience.live.noSupport"]);
+      return;
+    }
+
+    const profile = buildLiveProfile(liveProfileId);
+    if (!profile) {
+      setLiveStatus("error");
+      setLiveError(t["hearingLossExperience.live.error"]);
+      return;
+    }
+
+    try {
+      setLiveStatus("starting");
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      await engine.setProfile(profile, 100);
+      await engine.attachMediaStream(stream);
+      setLiveStatus("running");
+    } catch {
+      setLiveStatus("error");
+      setLiveError(t["hearingLossExperience.live.permissionDenied"]);
+    }
+  };
+
+  const stopLiveMonitoring = () => {
+    engine.stop();
+    setLiveStatus("idle");
   };
 
   // Live-update tone level while playing when the slider moves.
@@ -1426,7 +1514,7 @@ export default function HearingLoss() {
             <p className="mt-2 max-w-3xl text-sm text-gray-500">{t["hearingLossExperience.landing.headerBody"]}</p>
           </section>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {/* Hear & compare */}
             <button
               type="button"
@@ -1444,6 +1532,27 @@ export default function HearingLoss() {
                 </div>
                 <div className="mt-2 text-sm text-gray-500">
                   {t["hearingLossExperience.landing.compareBody"]}
+                </div>
+              </div>
+            </button>
+
+            {/* Live microphone mode */}
+            <button
+              type="button"
+              onClick={goToLiveMode}
+              className="group flex flex-col items-center gap-4 rounded-2xl border border-surface-300 bg-white shadow-sm p-6 text-center hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 sm:min-h-80 sm:justify-center sm:p-10"
+            >
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-steps-50 text-steps-600 transition group-hover:bg-steps-100 sm:h-24 sm:w-24">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.93V21h2v-3.07A7 7 0 0 0 19 11h-2Z" />
+                </svg>
+              </div>
+              <div>
+                <div className="text-base font-semibold text-gray-800 sm:text-lg">
+                  {t["hearingLossExperience.landing.liveTitle"]}
+                </div>
+                <div className="mt-2 text-sm text-gray-500">
+                  {t["hearingLossExperience.landing.liveBody"]}
                 </div>
               </div>
             </button>
@@ -1469,6 +1578,96 @@ export default function HearingLoss() {
               </div>
             </button>
           </div>
+        </div>
+      ) : screen === "live" ? (
+        // --- Live microphone mode -----------------------------------------------
+        <div className="space-y-6">
+          <section className="rounded-2xl border border-surface-300 bg-white shadow-sm p-5 sm:p-6">
+            <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
+              {t["hearingLossExperience.live.title"]}
+            </h1>
+            <p className="mt-2 max-w-3xl text-sm text-gray-500">
+              {t["hearingLossExperience.live.body"]}
+            </p>
+          </section>
+
+          <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950 shadow-sm sm:p-6">
+            <div className="text-sm font-semibold uppercase tracking-widest text-amber-700">
+              {t["hearingLossExperience.live.warningTitle"]}
+            </div>
+            <div className="mt-2 text-sm leading-relaxed">
+              {t["hearingLossExperience.live.warningBody"]}
+            </div>
+            <div className="mt-3 rounded-xl border border-amber-200 bg-white/70 p-4 text-sm font-medium text-amber-900">
+              {t["hearingLossExperience.live.headphonesNote"]}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-surface-300 bg-white p-5 shadow-sm sm:p-6">
+            <div className="text-sm font-semibold uppercase tracking-widest text-gray-500">
+              {t["hearingLossExperience.live.profileLabel"]}
+            </div>
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {LIVE_PROFILES.map(({ id, titleKey, subtitleKey }) => {
+                const active = liveProfileId === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setLiveProfileId(id)}
+                    aria-pressed={active}
+                    className={
+                      "rounded-xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white " +
+                      (active ? "border-steps-400 bg-steps-50" : "border-surface-300 bg-white hover:bg-surface-50")
+                    }
+                  >
+                    <div className="font-semibold text-gray-800">{t[titleKey]}</div>
+                    <div className="mt-1 text-sm text-gray-500">{t[subtitleKey]}</div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={startLiveMonitoring}
+                disabled={liveStatus === "starting" || liveStatus === "running"}
+                className="rounded-lg border border-steps-300 bg-steps-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-steps-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {liveStatus === "starting" ? t["hearingLossExperience.live.starting"] : t["hearingLossExperience.live.start"]}
+              </button>
+              <button
+                type="button"
+                onClick={stopLiveMonitoring}
+                disabled={liveStatus === "idle"}
+                className="rounded-lg border border-surface-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-surface-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {t["hearingLossExperience.live.stop"]}
+              </button>
+              <button
+                type="button"
+                onClick={goToLanding}
+                className="rounded-lg border border-surface-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-surface-100"
+              >
+                {t["hearingLossExperience.live.back"]}
+              </button>
+            </div>
+
+            <div className="mt-4 text-sm text-gray-500">
+              {liveStatus === "running"
+                ? t["hearingLossExperience.live.statusRunning"]
+                : liveStatus === "starting"
+                  ? t["hearingLossExperience.live.statusStarting"]
+                  : t["hearingLossExperience.live.statusIdle"]}
+            </div>
+
+            {liveError && (
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                {liveError}
+              </div>
+            )}
+          </section>
         </div>
       ) : screen === "compare" ? (
         // --- Compare dashboard ---------------------------------------------------

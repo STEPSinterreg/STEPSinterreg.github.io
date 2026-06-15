@@ -21,6 +21,8 @@ export class AudioEngine {
   private audioElement: Maybe<HTMLAudioElement> = null;
   private elementSource: Maybe<MediaElementAudioSourceNode> = null;
   private elementSourceByEl: WeakMap<HTMLAudioElement, MediaElementAudioSourceNode> = new WeakMap();
+  private mediaStream: Maybe<MediaStream> = null;
+  private mediaStreamSource: Maybe<MediaStreamAudioSourceNode> = null;
   private analyser: Maybe<AnalyserNode> = null;
   private leftAnalyser: Maybe<AnalyserNode> = null;
   private rightAnalyser: Maybe<AnalyserNode> = null;
@@ -93,6 +95,31 @@ export class AudioEngine {
     // Use best-effort disconnect to avoid multiple parallel connections.
     try { this.elementSource.disconnect(this.elementInput); } catch (e) {}
     try { this.elementSource.connect(this.elementInput); } catch (e) {}
+
+    const profileToApply = this.currentProfile || ({ id: 'default', name: 'default', description: '', params: {} } as HearingProfile);
+    this.applyProfileToChain(this.elementInput, profileToApply);
+  }
+
+  async attachMediaStream(stream: MediaStream) {
+    await this.initOnUserGesture();
+    if (!this.ctx) throw new Error('AudioContext not initialized');
+    if (!this.elementInput) {
+      this.elementInput = this.ctx.createGain();
+      this.elementInput.gain.value = 1;
+    }
+
+    if (this.mediaStream === stream && this.mediaStreamSource) return;
+
+    this.stop();
+
+    this.mediaStream = stream;
+    if (this.mediaStreamSource) {
+      try { this.mediaStreamSource.disconnect(); } catch (e) {}
+      this.mediaStreamSource = null;
+    }
+
+    this.mediaStreamSource = (this.ctx as any).createMediaStreamSource(stream) as MediaStreamAudioSourceNode;
+    try { this.mediaStreamSource.connect(this.elementInput); } catch (e) {}
 
     const profileToApply = this.currentProfile || ({ id: 'default', name: 'default', description: '', params: {} } as HearingProfile);
     this.applyProfileToChain(this.elementInput, profileToApply);
@@ -309,6 +336,8 @@ export class AudioEngine {
     const profileToApply = this.currentProfile || ({ id: 'default', name: 'default', description: '', params: {} } as HearingProfile);
     if (this.elementSource) {
       this.applyProfileToChain(this.elementInput || this.elementSource, profileToApply);
+    } else if (this.mediaStreamSource) {
+      this.applyProfileToChain(this.elementInput || this.mediaStreamSource, profileToApply);
     } else if (this.currentSource) {
       // restart buffer source to apply changes
       const wasPlaying = !!this.currentSource;
@@ -822,6 +851,8 @@ export class AudioEngine {
     // if using element source, rebuild chain live; otherwise restart bufferSource
     if (this.elementSource) {
       this.applyProfileToChain(this.elementInput || this.elementSource, profile);
+    } else if (this.mediaStreamSource) {
+      this.applyProfileToChain(this.elementInput || this.mediaStreamSource, profile);
     } else if (this.currentSource) {
       this.stop();
       await this.play();
@@ -837,6 +868,12 @@ export class AudioEngine {
       const profileToApply = this.currentProfile || ({ id: 'default', name: 'default', description: '', params: {} } as HearingProfile);
       if (this.elementSource) this.applyProfileToChain(this.elementInput || this.elementSource, profileToApply);
       try { await this.audioElement.play(); } catch (e) { throw e; }
+      return;
+    }
+
+    if (this.mediaStreamSource) {
+      const profileToApply = this.currentProfile || ({ id: 'default', name: 'default', description: '', params: {} } as HearingProfile);
+      this.applyProfileToChain(this.elementInput || this.mediaStreamSource, profileToApply);
       return;
     }
 
@@ -858,6 +895,10 @@ export class AudioEngine {
   pause() {
     if (this.audioElement) {
       try { this.audioElement.pause(); } catch (e) {}
+      return;
+    }
+    if (this.mediaStreamSource) {
+      this.stop();
       return;
     }
     // no resume support for bufferSource; implement as stop
@@ -889,6 +930,15 @@ export class AudioEngine {
         try { this.currentSource.stop(); } catch (e) {}
         try { this.currentSource.disconnect(); } catch (e) {}
         this.currentSource = null;
+      }
+
+      if (this.mediaStreamSource) {
+        try { this.mediaStreamSource.disconnect(); } catch (e) {}
+        this.mediaStreamSource = null;
+      }
+      if (this.mediaStream) {
+        try { this.mediaStream.getTracks().forEach((track) => track.stop()); } catch (e) {}
+        this.mediaStream = null;
       }
 
       for (const n of this.createdNodes) {
