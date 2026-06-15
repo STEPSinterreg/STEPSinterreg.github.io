@@ -21,6 +21,7 @@ export default function App() {
   const isHearingLossLevel = isHearingLoss && search.get("screen") === "level";
   const isHearingLossCompare = isHearingLoss && search.get("screen") === "compare";
   const isHearingLossExperience = isHearingLoss && search.get("screen") === "experience";
+  const isHearingLossLive = isHearingLoss && search.get("screen") === "live";
   const showHearingLossDevUnlock = isHearingLossExperience;
   const { locale } = useLocale();
   const { setting, setSetting } = useTheme();
@@ -80,7 +81,7 @@ export default function App() {
         </button>
       )}
 
-      {(isHearingLossCompare || isHearingLossExperience) && (
+      {(isHearingLossCompare || isHearingLossExperience || isHearingLossLive) && (
         <button
           className={topBarButtonClass}
           onClick={() => {
@@ -92,7 +93,7 @@ export default function App() {
         </button>
       )}
 
-      {!isDashboard && !isHearingLossLevel && !isHearingLossCompare && !isHearingLossExperience && (
+      {!isDashboard && !isHearingLossLevel && !isHearingLossCompare && !isHearingLossExperience && !isHearingLossLive && (
         <button
           className={topBarButtonClass}
           onClick={() => {
@@ -227,7 +228,7 @@ export default function App() {
                           </button>
                         )}
 
-                        {(isHearingLossCompare || isHearingLossExperience) && (
+                        {(isHearingLossCompare || isHearingLossExperience || isHearingLossLive) && (
                           <button
                             className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm text-gray-700 hover:bg-steps-50"
                             onClick={() => {
@@ -239,7 +240,7 @@ export default function App() {
                           </button>
                         )}
 
-                        {!isDashboard && !isHearingLossLevel && !isHearingLossCompare && !isHearingLossExperience && (
+                        {!isDashboard && !isHearingLossLevel && !isHearingLossCompare && !isHearingLossExperience && !isHearingLossLive && (
                           <button
                             className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm text-gray-700 hover:bg-steps-50"
                             onClick={() => {

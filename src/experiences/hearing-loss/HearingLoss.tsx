@@ -1504,6 +1504,13 @@ export default function HearingLoss() {
     );
   };
 
+  const modeCardClass =
+    "group flex min-h-72 flex-col items-center gap-4 rounded-2xl border border-surface-300 bg-white p-6 text-center shadow-sm transition hover:border-steps-200 hover:bg-surface-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 sm:min-h-80 sm:justify-center sm:p-8";
+  const modeIconShellClass =
+    "flex h-24 w-24 items-center justify-center rounded-2xl border border-surface-300 bg-surface-50 text-gray-800 transition group-hover:border-steps-200 group-hover:bg-steps-50 sm:h-28 sm:w-28";
+  const modeImageIconClass =
+    "h-14 w-14 object-contain brightness-0 opacity-90 transition-opacity group-hover:opacity-100 sm:h-16 sm:w-16";
+
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
       {screen === "landing" ? (
@@ -1519,18 +1526,20 @@ export default function HearingLoss() {
             <button
               type="button"
               onClick={goToCompare}
-              className="group flex flex-col items-center gap-4 rounded-2xl border border-surface-300 bg-white shadow-sm p-6 text-center hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 sm:min-h-80 sm:justify-center sm:p-10"
+              className={modeCardClass}
             >
-              <img
-                src="/icons/listen 512x512.png"
-                alt=""
-                className="h-20 w-20 object-contain brightness-0 opacity-90 transition-opacity group-hover:opacity-100 sm:h-24 sm:w-24"
-              />
-              <div>
-                <div className="text-base font-semibold text-gray-800 sm:text-lg">
+              <div className={modeIconShellClass}>
+                <img
+                  src="/icons/listen 512x512.png"
+                  alt=""
+                  className={modeImageIconClass}
+                />
+              </div>
+              <div className="max-w-xs">
+                <div className="text-base font-semibold leading-snug text-gray-800 sm:text-lg">
                   {t["hearingLossExperience.landing.compareTitle"]}
                 </div>
-                <div className="mt-2 text-sm text-gray-500">
+                <div className="mt-2 text-sm leading-relaxed text-gray-500">
                   {t["hearingLossExperience.landing.compareBody"]}
                 </div>
               </div>
@@ -1540,18 +1549,21 @@ export default function HearingLoss() {
             <button
               type="button"
               onClick={goToLiveMode}
-              className="group flex flex-col items-center gap-4 rounded-2xl border border-surface-300 bg-white shadow-sm p-6 text-center hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 sm:min-h-80 sm:justify-center sm:p-10"
+              className={modeCardClass}
             >
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-steps-50 text-steps-600 transition group-hover:bg-steps-100 sm:h-24 sm:w-24">
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.93V21h2v-3.07A7 7 0 0 0 19 11h-2Z" />
+              <div className={modeIconShellClass}>
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="opacity-90 transition-opacity group-hover:opacity-100">
+                  <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3Z" />
+                  <path d="M19 11a7 7 0 0 1-14 0" />
+                  <path d="M12 18v3" />
+                  <path d="M8 21h8" />
                 </svg>
               </div>
-              <div>
-                <div className="text-base font-semibold text-gray-800 sm:text-lg">
+              <div className="max-w-xs">
+                <div className="text-base font-semibold leading-snug text-gray-800 sm:text-lg">
                   {t["hearingLossExperience.landing.liveTitle"]}
                 </div>
-                <div className="mt-2 text-sm text-gray-500">
+                <div className="mt-2 text-sm leading-relaxed text-gray-500">
                   {t["hearingLossExperience.landing.liveBody"]}
                 </div>
               </div>
@@ -1561,18 +1573,20 @@ export default function HearingLoss() {
             <button
               type="button"
               onClick={goToExperienceMenu}
-              className="group flex flex-col items-center gap-4 rounded-2xl border border-surface-300 bg-white shadow-sm p-6 text-center hover:bg-surface-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 sm:min-h-80 sm:justify-center sm:p-10"
+              className={modeCardClass}
             >
-              <img
-                src="/icons/audiogram 512x512.png"
-                alt=""
-                className="h-20 w-20 object-contain brightness-0 opacity-90 transition-opacity group-hover:opacity-100 sm:h-24 sm:w-24"
-              />
-              <div>
-                <div className="text-base font-semibold text-gray-800 sm:text-lg">
+              <div className={modeIconShellClass}>
+                <img
+                  src="/icons/audiogram 512x512.png"
+                  alt=""
+                  className={modeImageIconClass}
+                />
+              </div>
+              <div className="max-w-xs">
+                <div className="text-base font-semibold leading-snug text-gray-800 sm:text-lg">
                   {t["hearingLossExperience.landing.experienceTitle"]}
                 </div>
-                <div className="mt-2 text-sm text-gray-500">
+                <div className="mt-2 text-sm leading-relaxed text-gray-500">
                   {t["hearingLossExperience.landing.experienceBody"]}
                 </div>
               </div>
