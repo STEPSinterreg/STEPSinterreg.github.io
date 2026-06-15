@@ -117,12 +117,12 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.menu.introCta": "Start introduktion",
     "hearingLossExperience.menu.levelsTitle": "Niveauer",
 
-    "hearingLossExperience.landing.headerBody": "Start med at lytte og sammenligne. Prøv derefter live mikrofon, og slut med et kort guidet forløb, hvis der er tid.",
+    "hearingLossExperience.landing.headerBody": "Vælg en oplevelse. I afspilleren kan du bruge tale, gadestøj, fugle eller mikrofon som lydkilde.",
     "hearingLossExperience.landing.compareTitle": "1. Hør og sammenlign",
     "hearingLossExperience.landing.compareBody": "Afspil den samme lyd med forskellige hørefiltre. Lyt efter, hvad der bliver lavere, utydeligt eller forsvinder.",
     "hearingLossExperience.landing.liveTitle": "2. Live mikrofon",
     "hearingLossExperience.landing.liveBody": "Stå op, sig et kort ord eller klap, og hør hvordan lyden ændrer sig med det samme.",
-    "hearingLossExperience.landing.experienceTitle": "3. Kort høretest",
+    "hearingLossExperience.landing.experienceTitle": "2. Kort høretest",
     "hearingLossExperience.landing.experienceBody": "Lyt til toner, se et audiogram, og prøv at justere lyden som med et simpelt høreapparat.",
     "hearingLossExperience.live.title": "Live mikrofon",
     "hearingLossExperience.live.body": "Stå op, start mikrofonen, og prøv en kort lyd: sig dit navn, sig et ord, klap eller knips.",
@@ -204,6 +204,7 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.audioKind.speechMark": "Tale (Mark)",
     "hearingLossExperience.audioKind.street": "Travl gade",
     "hearingLossExperience.audioKind.birds": "Fuglekvidder",
+    "hearingLossExperience.audioKind.microphone": "Mikrofon",
 
     "hearingLossExperience.guide.title": "Guide",
     "hearingLossExperience.guide.notDb": "Før du fortsætter: Sæt en behagelig enhedsvolumen.",
@@ -385,7 +386,7 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.menu.introCta": "Einführung starten",
     "hearingLossExperience.menu.levelsTitle": "Levels",
 
-    "hearingLossExperience.landing.headerBody": "Wählen Sie einen schnellen Vergleich, ein kurzes geführtes Lernen oder einen Live-Mikrofonmodus, der den Klang in Echtzeit verarbeitet.",
+    "hearingLossExperience.landing.headerBody": "Wählen Sie ein Erlebnis. Im Player können Sie Sprache, Straßenlärm, Vögel oder das Mikrofon als Klangquelle nutzen.",
     "hearingLossExperience.landing.compareTitle": "Hörverlust-Typen hören und vergleichen",
     "hearingLossExperience.landing.compareBody": "Spielen Sie Testton mit verschiedenen Hörverlust-Filtern ab und vergleichen Sie den Klang.",
     "hearingLossExperience.landing.liveTitle": "Live-Mikrofonmodus",
@@ -472,6 +473,7 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.audioKind.speechMark": "Sprache (Mark)",
     "hearingLossExperience.audioKind.street": "Belebte Straße",
     "hearingLossExperience.audioKind.birds": "Vogelgezwitscher",
+    "hearingLossExperience.audioKind.microphone": "Mikrofon",
 
     "hearingLossExperience.guide.title": "Guide",
     "hearingLossExperience.guide.notDb": "Bevor du weitermachst: Stell eine angenehme Geräte-Lautstärke ein.",
@@ -653,7 +655,7 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.menu.introCta": "Start introduction",
     "hearingLossExperience.menu.levelsTitle": "Levels",
 
-    "hearingLossExperience.landing.headerBody": "Choose a quick compare sandbox, a short guided lesson, or a live microphone mode that processes sound in real time.",
+    "hearingLossExperience.landing.headerBody": "Choose an experience. In the player, you can use speech, street noise, birds, or the microphone as the sound source.",
     "hearingLossExperience.landing.compareTitle": "Hear and Compare Types of Hearing Loss",
     "hearingLossExperience.landing.compareBody": "Play audio with different hearing loss filters applied and compare how they sound.",
     "hearingLossExperience.landing.liveTitle": "Live microphone mode",
@@ -740,6 +742,7 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.audioKind.speechMark": "Speech (Mark)",
     "hearingLossExperience.audioKind.street": "Busy street",
     "hearingLossExperience.audioKind.birds": "Birds chirping",
+    "hearingLossExperience.audioKind.microphone": "Microphone",
 
     "hearingLossExperience.guide.title": "Guide",
     "hearingLossExperience.guide.notDb": "Before you continue: set a comfortable device volume.",

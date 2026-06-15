@@ -14,6 +14,7 @@ export type SoundOption = {
   key: string;
   label: string;
   loop?: boolean;
+  source?: "audio" | "microphone";
 };
 
 export type ProfileOption = {
@@ -31,6 +32,8 @@ type Props = {
 
   /** Called before play() so parent can attach to engine + set profile. */
   onBeforePlay?: (audioEl: HTMLAudioElement, soundKey: string) => Promise<void> | void;
+  onStartMicrophone?: (soundKey: string) => Promise<void> | void;
+  onStopMicrophone?: (soundKey: string) => Promise<void> | void;
 
   playLabel: string;
   pauseLabel: string;
@@ -53,6 +56,8 @@ export default function UnifiedAudioPlayer({
   selectedProfile,
   onProfileChange,
   onBeforePlay,
+  onStartMicrophone,
+  onStopMicrophone,
   playLabel,
   pauseLabel,
   stopLabel,
@@ -77,6 +82,7 @@ export default function UnifiedAudioPlayer({
 
   const src = selectedSound ? audioSrcByKey[selectedSound.key] : "";
   const loop = !!selectedSound?.loop;
+  const isMicrophone = selectedSound?.source === "microphone";
 
   // Reset playback when audio source actually changes.
   useEffect(() => {
@@ -86,7 +92,7 @@ export default function UnifiedAudioPlayer({
     setDuration(0);
     setIsPlaying(false);
     try { el.pause(); el.currentTime = 0; } catch { /* ignore */ }
-  }, [src]);
+  }, [src, isMicrophone]);
 
   useEffect(() => {
     const el = audioRef.current;
@@ -123,6 +129,26 @@ export default function UnifiedAudioPlayer({
 
   const togglePlay = async () => {
     const el = audioRef.current;
+    if (isMicrophone && selectedSound) {
+      try {
+        if (isPlaying) {
+          await onStopMicrophone?.(selectedSound.key);
+          setIsPlaying(false);
+        } else {
+          await onStartMicrophone?.(selectedSound.key);
+          setIsPlaying(true);
+          setPlayedKeys((prev) => {
+            if (prev.has(selectedKey)) return prev;
+            const next = new Set(prev);
+            next.add(selectedKey);
+            return next;
+          });
+        }
+      } catch {
+        setIsPlaying(false);
+      }
+      return;
+    }
     if (!el) return;
     if (isPlaying) {
       el.pause();
@@ -146,6 +172,12 @@ export default function UnifiedAudioPlayer({
 
   const handleStop = () => {
     const el = audioRef.current;
+    if (isMicrophone && selectedSound) {
+      void onStopMicrophone?.(selectedSound.key);
+      setIsPlaying(false);
+      setCurrentTime(0);
+      return;
+    }
     if (!el) return;
     try { el.pause(); el.currentTime = 0; } catch { /* ignore */ }
     setCurrentTime(0);
@@ -155,12 +187,34 @@ export default function UnifiedAudioPlayer({
     if (key === selectedKey) return;
     const el = audioRef.current;
     const wasPlaying = isPlaying;
+    const wasMicrophone = selectedSound?.source === "microphone";
     if (el) {
       try { el.pause(); el.currentTime = 0; } catch { /* ignore */ }
+    }
+    if (wasMicrophone && selectedSound) {
+      void onStopMicrophone?.(selectedSound.key);
+      setIsPlaying(false);
     }
     setSelectedKey(key);
     if (wasPlaying) {
       requestAnimationFrame(async () => {
+        const nextSound = sounds.find((s) => s.key === key);
+        if (nextSound?.source === "microphone") {
+          try {
+            await onStartMicrophone?.(key);
+            setIsPlaying(true);
+            setPlayedKeys((prev) => {
+              if (prev.has(key)) return prev;
+              const n = new Set(prev);
+              n.add(key);
+              return n;
+            });
+          } catch {
+            setIsPlaying(false);
+          }
+          return;
+        }
+
         const next = audioRef.current;
         if (!next) return;
         try {
@@ -195,14 +249,14 @@ export default function UnifiedAudioPlayer({
   };
 
   const displayedTime = useMemo(() => {
-    if (!seeking || seekPct === null || duration <= 0) return currentTime;
+    if (isMicrophone || !seeking || seekPct === null || duration <= 0) return currentTime;
     return duration * clamp01(seekPct / 1000);
-  }, [currentTime, duration, seeking, seekPct]);
+  }, [currentTime, duration, isMicrophone, seeking, seekPct]);
 
   const progress0to1000 = useMemo(() => {
-    if (duration <= 0) return 0;
+    if (isMicrophone || duration <= 0) return 0;
     return clamp((currentTime / duration) * 1000, 0, 1000);
-  }, [currentTime, duration]);
+  }, [currentTime, duration, isMicrophone]);
 
   const sliderValue = seeking && seekPct !== null ? seekPct : progress0to1000;
 
@@ -232,7 +286,9 @@ export default function UnifiedAudioPlayer({
     void togglePlayAfterSeek();
   };
 
-  const timeText = `${formatTime(displayedTime)} / ${duration > 0 ? formatTime(duration) : "--:--"}`;
+  const timeText = isMicrophone && isPlaying
+    ? "Live"
+    : `${formatTime(displayedTime)} / ${duration > 0 ? formatTime(duration) : "--:--"}`;
 
   return (
     <div className="rounded-2xl border border-surface-300 bg-white p-4 shadow-sm sm:p-5">
@@ -259,7 +315,7 @@ export default function UnifiedAudioPlayer({
           max={1000}
           step={1}
           value={Math.round(sliderValue)}
-          disabled={duration <= 0}
+          disabled={isMicrophone || duration <= 0}
           onPointerDown={beginSeek}
           onPointerUp={endSeek}
           onChange={(e) => setSeekPct(Number(e.target.value))}

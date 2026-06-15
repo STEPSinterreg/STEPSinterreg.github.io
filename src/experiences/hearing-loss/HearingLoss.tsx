@@ -301,7 +301,7 @@ export default function HearingLoss() {
 
   useEffect(() => {
     if (screen === "live") return;
-    if (liveStatus !== "idle") {
+    if (prevScreenRef.current === "live" && liveStatus !== "idle") {
       engine.stop();
       setLiveStatus("idle");
     }
@@ -309,7 +309,6 @@ export default function HearingLoss() {
 
   const goToExperienceMenu = () => setSearchParams({ screen: "experience" });
   const goToCompare = () => setSearchParams({ screen: "compare" });
-  const goToLiveMode = () => setSearchParams({ screen: "live" });
   const goToLanding = () => setSearchParams({});
 
   // Used in the level-complete buttons.
@@ -785,9 +784,10 @@ export default function HearingLoss() {
   );
 
   // --- Multi audio players (visual-first) ---
-  type AudioKind = "speechJessica" | "speechMark" | "street" | "birds";
+  type AudioFileKind = "speechJessica" | "speechMark" | "street" | "birds";
+  type AudioKind = AudioFileKind | "microphone";
 
-  const AUDIO_FILES: Record<AudioKind, readonly string[]> = {
+  const AUDIO_FILES: Record<AudioFileKind, readonly string[]> = {
     speechJessica: ["Speech Jessica 1 - Not Looping.mp3", "Speech Jessica 2 - Not Looping.mp3"],
     speechMark: ["Speech Mark 1 - Not Looping.mp3", "Speech Mark 2 - Not Looping.mp3"],
     street: [
@@ -799,18 +799,19 @@ export default function HearingLoss() {
     birds: ["Birds Chirping 1 - Looping.wav", "Birds Chirping 2 - Looping.wav", "Birds Chirping 3 - Looping.wav"],
   };
 
-  const AUDIO_LOOP: Record<AudioKind, boolean> = {
+  const AUDIO_LOOP: Record<AudioFileKind, boolean> = {
     speechJessica: false,
     speechMark: false,
     street: true,
     birds: true,
   };
 
-  const audioKinds: readonly AudioKind[] = ["speechJessica", "speechMark", "street", "birds"];
+  const audioFileKinds: readonly AudioFileKind[] = ["speechJessica", "speechMark", "street", "birds"];
+  const audioKinds: readonly AudioKind[] = ["speechJessica", "speechMark", "street", "birds", "microphone"];
   const toPublicAudioSrc = (fileName: string) => `/hearing-loss/audios/${encodeURIComponent(fileName)}`;
   const pickRandom = <T,>(items: readonly T[]) => items[Math.floor(Math.random() * items.length)];
 
-  const [audioSrcByKind, setAudioSrcByKind] = useState<Record<AudioKind, string>>(() => ({
+  const [audioSrcByKind, setAudioSrcByKind] = useState<Record<AudioFileKind, string>>(() => ({
     speechJessica: toPublicAudioSrc(pickRandom(AUDIO_FILES.speechJessica)),
     speechMark: toPublicAudioSrc(pickRandom(AUDIO_FILES.speechMark)),
     street: toPublicAudioSrc(pickRandom(AUDIO_FILES.street)),
@@ -850,22 +851,55 @@ export default function HearingLoss() {
   const unifiedSounds: SoundOption[] = audioKinds.map((kind) => ({
     key: kind,
     label: t[`hearingLossExperience.audioKind.${kind}`],
-    loop: AUDIO_LOOP[kind],
+    loop: kind === "microphone" ? false : AUDIO_LOOP[kind],
+    source: kind === "microphone" ? "microphone" : "audio",
   }));
 
-  const unifiedSrcByKey: Record<string, string> = audioKinds.reduce(
+  const unifiedSrcByKey: Record<string, string> = audioFileKinds.reduce(
     (acc, kind) => ({ ...acc, [kind]: audioSrcByKind[kind] }),
     {}
   );
 
   const onUnifiedBeforePlay = async (el: HTMLAudioElement, soundKey: string) => {
     setPlayingKind(soundKey as AudioKind);
+    if (soundKey === "microphone") return;
     if (activeLevel !== "intro") {
       await engine.attachMediaElement(el);
       if (sampledProfileAppliedRef.current) {
         await engine.setProfile(sampledProfileAppliedRef.current, 100);
       }
     }
+  };
+
+  const startUnifiedMicrophone = async (soundKey: string) => {
+    setPlayingKind(soundKey as AudioKind);
+    setLiveError(null);
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setLiveError(t["hearingLossExperience.live.noSupport"]);
+      throw new Error("Microphone input is not supported");
+    }
+
+    const profile = sampledProfileAppliedRef.current;
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (profile) {
+        await engine.setProfile(profile, 100);
+      }
+      await engine.attachMediaStream(stream);
+      setLiveStatus("running");
+    } catch {
+      setLiveStatus("error");
+      setLiveError(t["hearingLossExperience.live.permissionDenied"]);
+      throw new Error("Microphone permission denied");
+    }
+  };
+
+  const stopUnifiedMicrophone = () => {
+    engine.stop();
+    setLiveStatus("idle");
+    setPlayingKind(null);
   };
 
   // --- Audiogram chart (draggable points vertical-only) ---
@@ -1521,7 +1555,7 @@ export default function HearingLoss() {
             <p className="mt-2 max-w-3xl text-sm text-gray-500">{t["hearingLossExperience.landing.headerBody"]}</p>
           </section>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Hear & compare */}
             <button
               type="button"
@@ -1541,30 +1575,6 @@ export default function HearingLoss() {
                 </div>
                 <div className="mt-2 text-sm leading-relaxed text-gray-500">
                   {t["hearingLossExperience.landing.compareBody"]}
-                </div>
-              </div>
-            </button>
-
-            {/* Live microphone mode */}
-            <button
-              type="button"
-              onClick={goToLiveMode}
-              className={modeCardClass}
-            >
-              <div className={modeIconShellClass}>
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="opacity-90 transition-opacity group-hover:opacity-100">
-                  <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3Z" />
-                  <path d="M19 11a7 7 0 0 1-14 0" />
-                  <path d="M12 18v3" />
-                  <path d="M8 21h8" />
-                </svg>
-              </div>
-              <div className="max-w-xs">
-                <div className="text-base font-semibold leading-snug text-gray-800 sm:text-lg">
-                  {t["hearingLossExperience.landing.liveTitle"]}
-                </div>
-                <div className="mt-2 text-sm leading-relaxed text-gray-500">
-                  {t["hearingLossExperience.landing.liveBody"]}
                 </div>
               </div>
             </button>
@@ -1795,12 +1805,19 @@ export default function HearingLoss() {
                   sounds={unifiedSounds}
                   audioSrcByKey={unifiedSrcByKey}
                   onBeforePlay={onUnifiedBeforePlay}
+                  onStartMicrophone={startUnifiedMicrophone}
+                  onStopMicrophone={stopUnifiedMicrophone}
                   playLabel={t["play"]}
                   pauseLabel={t["pause"]}
                   stopLabel={t["stop"]}
                   soundLabel={t["hearingLossExperience.unifiedPlayer.soundLabel"]}
                   ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
                 />
+                {liveError && (
+                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                    {liveError}
+                  </div>
+                )}
 
                 <div className="flex justify-end">
                   <button
@@ -2083,12 +2100,19 @@ export default function HearingLoss() {
                         sounds={unifiedSounds}
                         audioSrcByKey={unifiedSrcByKey}
                         onBeforePlay={onUnifiedBeforePlay}
+                        onStartMicrophone={startUnifiedMicrophone}
+                        onStopMicrophone={stopUnifiedMicrophone}
                         playLabel={t["play"]}
                         pauseLabel={t["pause"]}
                         stopLabel={t["stop"]}
                         soundLabel={t["hearingLossExperience.unifiedPlayer.soundLabel"]}
                         ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
                       />
+                      {liveError && (
+                        <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                          {liveError}
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-4">

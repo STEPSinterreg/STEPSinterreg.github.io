@@ -9,9 +9,10 @@ import { translations } from "../../i18n/translations";
 
 // ── Audio file catalogue ─────────────────────────────────────────────────────
 
-type AudioKind = "speechJessica" | "speechMark" | "street" | "birds";
+type AudioFileKind = "speechJessica" | "speechMark" | "street" | "birds";
+type AudioKind = AudioFileKind | "microphone";
 
-const AUDIO_FILES: Record<AudioKind, readonly string[]> = {
+const AUDIO_FILES: Record<AudioFileKind, readonly string[]> = {
   speechJessica: ["Speech Jessica 1 - Not Looping.mp3", "Speech Jessica 2 - Not Looping.mp3"],
   speechMark: ["Speech Mark 1 - Not Looping.mp3", "Speech Mark 2 - Not Looping.mp3"],
   street: [
@@ -23,14 +24,15 @@ const AUDIO_FILES: Record<AudioKind, readonly string[]> = {
   birds: ["Birds Chirping 1 - Looping.wav", "Birds Chirping 2 - Looping.wav", "Birds Chirping 3 - Looping.wav"],
 };
 
-const AUDIO_LOOP: Record<AudioKind, boolean> = {
+const AUDIO_LOOP: Record<AudioFileKind, boolean> = {
   speechJessica: false,
   speechMark: false,
   street: true,
   birds: true,
 };
 
-const AUDIO_KINDS: readonly AudioKind[] = ["speechJessica", "speechMark", "street", "birds"];
+const AUDIO_FILE_KINDS: readonly AudioFileKind[] = ["speechJessica", "speechMark", "street", "birds"];
+const AUDIO_KINDS: readonly AudioKind[] = ["speechJessica", "speechMark", "street", "birds", "microphone"];
 
 const toPublicAudioSrc = (fileName: string) => `/hearing-loss/audios/${encodeURIComponent(fileName)}`;
 const pickRandom = <T,>(items: readonly T[]): T => items[Math.floor(Math.random() * items.length)]!;
@@ -127,7 +129,7 @@ export function HearingLossCompare() {
   const { locale } = useLocale();
   const t = translations[locale];
 
-  const [audioSrcByKind] = useState<Record<AudioKind, string>>(() => ({
+  const [audioSrcByKind] = useState<Record<AudioFileKind, string>>(() => ({
     speechJessica: toPublicAudioSrc(pickRandom(AUDIO_FILES.speechJessica)),
     speechMark:    toPublicAudioSrc(pickRandom(AUDIO_FILES.speechMark)),
     street:        toPublicAudioSrc(pickRandom(AUDIO_FILES.street)),
@@ -146,12 +148,17 @@ export function HearingLossCompare() {
     }
   }, []);
 
-  useEffect(() => () => { engine.stop(); }, []);
-
   const [selectedProfile, setSelectedProfile] = useState<string>(COMPARE_PROFILES[0].profileId);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
+  const [microphoneError, setMicrophoneError] = useState<string | null>(null);
 
   const lastAudioElRef = useRef<HTMLAudioElement | null>(null);
+  const microphoneRunningRef = useRef(false);
+
+  useEffect(() => () => {
+    microphoneRunningRef.current = false;
+    engine.stop();
+  }, []);
 
   const applyEngineProfile = async (el: HTMLAudioElement, profileId: string) => {
     lastAudioElRef.current = el;
@@ -165,24 +172,64 @@ export function HearingLossCompare() {
   };
 
   const onBeforePlay = async (el: HTMLAudioElement) => {
+    microphoneRunningRef.current = false;
     await applyEngineProfile(el, selectedProfile);
   };
 
   const onProfileCardClick = (nextProfileId: string) => {
     setSelectedProfile(nextProfileId);
+    if (microphoneRunningRef.current) {
+      const profile = sampledProfiles.current[nextProfileId];
+      if (profile) void engine.setProfile(profile, 100);
+    }
     const el = lastAudioElRef.current;
     if (el && !el.paused) {
       void applyEngineProfile(el, nextProfileId);
     }
   };
 
+  const startMicrophone = async () => {
+    setMicrophoneError(null);
+    lastAudioElRef.current = null;
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setMicrophoneError(t["hearingLossExperience.live.noSupport"]);
+      throw new Error("Microphone input is not supported");
+    }
+
+    const profile = sampledProfiles.current[selectedProfile];
+    if (!profile) {
+      setMicrophoneError(t["hearingLossExperience.live.error"]);
+      throw new Error("No hearing profile selected");
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      await engine.setProfile(profile, 100);
+      await engine.attachMediaStream(stream);
+      microphoneRunningRef.current = true;
+      const a = engine.getAnalyser();
+      if (a) setAnalyser(a);
+    } catch {
+      microphoneRunningRef.current = false;
+      setMicrophoneError(t["hearingLossExperience.live.permissionDenied"]);
+      throw new Error("Microphone permission denied");
+    }
+  };
+
+  const stopMicrophone = () => {
+    microphoneRunningRef.current = false;
+    engine.stop();
+  };
+
   const sounds: SoundOption[] = AUDIO_KINDS.map((kind) => ({
     key: kind,
     label: t[`hearingLossExperience.audioKind.${kind}`],
-    loop: AUDIO_LOOP[kind],
+    loop: kind === "microphone" ? false : AUDIO_LOOP[kind],
+    source: kind === "microphone" ? "microphone" : "audio",
   }));
 
-  const srcByKey: Record<string, string> = AUDIO_KINDS.reduce(
+  const srcByKey: Record<string, string> = AUDIO_FILE_KINDS.reduce(
     (acc, kind) => ({ ...acc, [kind]: audioSrcByKind[kind] }),
     {}
   );
@@ -270,6 +317,8 @@ export function HearingLossCompare() {
         sounds={sounds}
         audioSrcByKey={srcByKey}
         onBeforePlay={onBeforePlay}
+        onStartMicrophone={startMicrophone}
+        onStopMicrophone={stopMicrophone}
         playLabel={t["play"]}
         pauseLabel={t["pause"]}
         stopLabel={t["stop"]}
@@ -277,6 +326,12 @@ export function HearingLossCompare() {
         headerLabel={t["hearingLossExperience.compare.step2Label"]}
         ariaLabel={t["hearingLossExperience.audioPlayerLabel"]}
       />
+
+      {microphoneError && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+          {microphoneError}
+        </div>
+      )}
 
       {/* Live spectrum visualiser */}
       <section className="rounded-2xl border border-surface-300 bg-white p-4 shadow-sm sm:p-5">
