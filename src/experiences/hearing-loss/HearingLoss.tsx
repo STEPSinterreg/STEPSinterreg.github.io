@@ -1539,9 +1539,9 @@ export default function HearingLoss() {
   const modeCardClass =
     "group flex min-h-72 flex-col items-center gap-4 rounded-2xl border border-surface-300 bg-white p-6 text-center shadow-sm transition hover:border-steps-200 hover:bg-surface-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 sm:min-h-80 sm:justify-center sm:p-8";
   const modeIconShellClass =
-    "flex h-24 w-24 items-center justify-center rounded-2xl border border-surface-300 bg-surface-50 text-gray-800 transition group-hover:border-steps-200 group-hover:bg-steps-50 sm:h-28 sm:w-28";
+    "flex items-center justify-center text-gray-800";
   const modeImageIconClass =
-    "h-14 w-14 object-contain brightness-0 opacity-90 transition-opacity group-hover:opacity-100 sm:h-16 sm:w-16";
+    "h-24 w-24 object-contain brightness-0 opacity-90 transition-opacity group-hover:opacity-100 sm:h-28 sm:w-28";
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
