@@ -118,11 +118,11 @@ export const translations: Record<string, Record<string, string>> = {
     "hearingLossExperience.menu.levelsTitle": "Niveauer",
 
     "hearingLossExperience.landing.headerBody": "Vælg en oplevelse. I afspilleren kan du bruge tale, gadestøj, fugle eller mikrofon som lydkilde.",
-    "hearingLossExperience.landing.compareTitle": "1. Hør og sammenlign",
+    "hearingLossExperience.landing.compareTitle": "Hør og sammenlign",
     "hearingLossExperience.landing.compareBody": "Afspil den samme lyd med forskellige hørefiltre. Lyt efter, hvad der bliver lavere, utydeligt eller forsvinder.",
     "hearingLossExperience.landing.liveTitle": "2. Live mikrofon",
     "hearingLossExperience.landing.liveBody": "Stå op, sig et kort ord eller klap, og hør hvordan lyden ændrer sig med det samme.",
-    "hearingLossExperience.landing.experienceTitle": "2. Kort høretest",
+    "hearingLossExperience.landing.experienceTitle": "Oplev høretab og prøv at korrigere det med moderne teknologi",
     "hearingLossExperience.landing.experienceBody": "Lyt til toner, se et audiogram, og prøv at justere lyden som med et simpelt høreapparat.",
     "hearingLossExperience.live.title": "Live mikrofon",
     "hearingLossExperience.live.body": "Stå op, start mikrofonen, og prøv en kort lyd: sig dit navn, sig et ord, klap eller knips.",
