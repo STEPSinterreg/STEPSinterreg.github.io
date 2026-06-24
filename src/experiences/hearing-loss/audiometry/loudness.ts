@@ -5,7 +5,8 @@ export type YesNo = "yes" | "no";
 
 export const LOUDNESS_MIN_LEVEL = 1;
 export const LOUDNESS_MAX_LEVEL = 100;
-export const LOUDNESS_START_LEVEL = 50;
+// Maps to approximately 0 dB HL in the hearing-test UI.
+export const LOUDNESS_START_LEVEL = 9;
 
 // Loudness mapping is intentionally "non-diagnostic".
 // We still want low slider values to be close to inaudible on typical consumer earbuds.

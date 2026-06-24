@@ -1542,6 +1542,36 @@ export default function HearingLoss() {
     "flex items-center justify-center text-gray-800";
   const modeImageIconClass =
     "h-24 w-24 object-contain brightness-0 opacity-90 transition-opacity group-hover:opacity-100 sm:h-28 sm:w-28";
+  const activeStageIndex = stagesForLevel.indexOf(normalizedStage);
+
+  const CalibrationNotice = () => (
+    <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/60 dark:bg-amber-500/10 dark:text-amber-200">
+      <div className="font-semibold">{t["hearingLossExperience.guide.calibrationTitle"]}</div>
+      <div className="mt-1 leading-relaxed">{t["hearingLossExperience.guide.calibrationWarning"]}</div>
+    </div>
+  );
+
+  const EarSymbol = ({ side, active }: { side: Ear; active: boolean }) => (
+    <div
+      className={
+        "flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border p-4 transition " +
+        (active
+          ? "border-steps-400 bg-steps-50 text-steps-700 shadow-sm"
+          : "border-surface-300 bg-surface-50 text-gray-400")
+      }
+      aria-current={active ? "step" : undefined}
+    >
+      <svg width="34" height="34" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M31 35c0 4-3 7-7 7-5 0-8-4-8-8" />
+        <path d="M18 17a11 11 0 1 1 20 6c-2 3-5 5-7 8-1 2-2 3-4 3" />
+        <path d="M23 18a6 6 0 1 1 10 4c-2 2-4 4-5 6" />
+        {side === "L" ? <path d="M8 12v24h10" /> : <path d="M40 12v24H30" />}
+      </svg>
+      <span className="text-sm font-semibold">
+        {side === "R" ? t["hearingLossExperience.test.earRight"] : t["hearingLossExperience.test.earLeft"]}
+      </span>
+    </div>
+  );
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -1770,18 +1800,50 @@ export default function HearingLoss() {
                 <p className="mt-1 text-sm text-gray-500">{visibleLevelSubtitle}</p>
               </div>
 
-              <div className="flex items-center gap-2">
-                {stagesForLevel.map((s) => (
-                  <span
-                    key={s}
-                    className={
-                      "rounded-full border px-2 py-1 text-xs " +
-                      (normalizedStage === s ? "border-steps-300 text-gray-700" : "border-surface-300 text-gray-400")
-                    }
-                  >
-                    {t[`hearingLossExperience.stage.${s}`]}
-                  </span>
-                ))}
+              <div className="w-full sm:max-w-md" aria-label={t["hearingLossExperience.progress"]}>
+                <ol className="grid items-start gap-0" style={{ gridTemplateColumns: `repeat(${stagesForLevel.length}, minmax(0, 1fr))` }}>
+                  {stagesForLevel.map((s, idx) => {
+                    const isCurrent = normalizedStage === s;
+                    const isPast = idx < activeStageIndex;
+                    return (
+                      <li key={s} className="relative flex flex-col items-center gap-2 text-center">
+                        {idx > 0 ? (
+                          <span
+                            className={
+                              "absolute left-0 right-1/2 top-3 h-0.5 " +
+                              (idx <= activeStageIndex ? "bg-steps-400" : "bg-surface-300")
+                            }
+                            aria-hidden="true"
+                          />
+                        ) : null}
+                        {idx < stagesForLevel.length - 1 ? (
+                          <span
+                            className={
+                              "absolute left-1/2 right-0 top-3 h-0.5 " +
+                              (idx < activeStageIndex ? "bg-steps-400" : "bg-surface-300")
+                            }
+                            aria-hidden="true"
+                          />
+                        ) : null}
+                        <span
+                          className={
+                            "relative z-10 flex h-6 w-6 items-center justify-center rounded-full border text-[11px] font-semibold " +
+                            (isCurrent
+                              ? "border-steps-500 bg-steps-500 text-white"
+                              : isPast
+                                ? "border-steps-400 bg-steps-100 text-steps-700"
+                                : "border-surface-300 bg-white text-gray-400")
+                          }
+                        >
+                          {isPast ? "✓" : idx + 1}
+                        </span>
+                        <span className={isCurrent ? "text-xs font-semibold text-gray-800" : "text-xs text-gray-400"}>
+                          {t[`hearingLossExperience.stage.${s}`]}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ol>
               </div>
             </div>
           </section>
@@ -1790,6 +1852,7 @@ export default function HearingLoss() {
             {normalizedStage === "listen" && (
               <div className="space-y-4">
                 <div className="text-sm text-gray-500">{t["hearingLossExperience.listen.body"]}</div>
+                <CalibrationNotice />
 
                 <details className="rounded-xl border border-surface-300 bg-surface-50 p-4">
                   <summary className="cursor-pointer text-sm font-medium text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100">
@@ -1852,12 +1915,13 @@ export default function HearingLoss() {
                     </div>
 
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      <div className="rounded-xl border border-surface-300 bg-surface-50 p-4">
-                        <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                      <div>
+                        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
                           {t["hearingLossExperience.test.currentEar"]}
                         </div>
-                        <div className="mt-1 text-lg font-semibold text-gray-800">
-                          {ear === "R" ? t["hearingLossExperience.test.earRight"] : t["hearingLossExperience.test.earLeft"]}
+                        <div className="grid grid-cols-2 gap-2">
+                          <EarSymbol side="R" active={ear === "R"} />
+                          <EarSymbol side="L" active={ear === "L"} />
                         </div>
                       </div>
 
@@ -1874,6 +1938,8 @@ export default function HearingLoss() {
                     <div className="text-sm text-gray-500">{t["hearingLossExperience.test.body"]}</div>
                   </div>
 
+                  <CalibrationNotice />
+
                   <div className="rounded-xl border border-surface-300 bg-surface-50 p-4">
                     <LabeledSlider
                       label={t["hearingLossExperience.test.loudnessLabel"]}
@@ -1884,6 +1950,7 @@ export default function HearingLoss() {
                       displayValue={Math.round(sliderDbHlUi)}
                       unit={t["hearingLossExperience.test.dbhlUnit"]}
                       showDirectionBars
+                      directionBarLabel={t["hearingLossExperience.test.directionBarLabel"]}
                       onChange={(v) => {
                         setSliderDbHlUi(v);
                         const roundedDbHl = Math.round(v);
@@ -2032,6 +2099,8 @@ export default function HearingLoss() {
                   <div className="text-sm font-semibold">{audiogramTitle}</div>
                   <div className="mt-1 text-sm text-gray-500">{t["hearingLossExperience.audiogram.body"]}</div>
                 </div>
+
+                <CalibrationNotice />
 
                 {normalizedStage === "audiogram" ? (
                   <div className="rounded-xl border border-surface-300 bg-surface-50 p-4">

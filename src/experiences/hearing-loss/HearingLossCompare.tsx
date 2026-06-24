@@ -253,6 +253,20 @@ export function HearingLossCompare() {
       </section>
 
       {/* Step 1 — Profile cards */}
+      <details className="rounded-2xl border border-surface-300 bg-white p-5 shadow-sm" open>
+        <summary className="cursor-pointer text-sm font-semibold text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
+          {t["hearingLossExperience.compare.guideTitle"]}
+        </summary>
+        <div className="mt-3 space-y-2 text-sm leading-relaxed text-gray-500">
+          <p>{t["hearingLossExperience.compare.guideBody"]}</p>
+          <p>{t["hearingLossExperience.compare.guideSpectrum"]}</p>
+        </div>
+        <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-500/60 dark:bg-amber-500/10 dark:text-amber-200">
+          <div className="font-semibold">{t["hearingLossExperience.guide.calibrationTitle"]}</div>
+          <div className="mt-1">{t["hearingLossExperience.guide.calibrationWarning"]}</div>
+        </div>
+      </details>
+
       <section className="rounded-2xl border border-surface-300 bg-white p-5 shadow-sm">
         <div className="mb-4 text-xs font-semibold uppercase tracking-widest text-gray-500">
           {t["hearingLossExperience.compare.step1Label"]}
@@ -277,6 +291,10 @@ export function HearingLossCompare() {
                 {/* Frequency response curve */}
                 <div className="h-12 w-full overflow-hidden rounded-lg bg-surface-100">
                   <FrequencyCurve type={curveType} active={active} />
+                </div>
+                <div className="flex items-center justify-between text-[11px] font-medium text-gray-400">
+                  <span>250 {t["common.hz"]}</span>
+                  <span>8 {t["common.khz"]}</span>
                 </div>
 
                 {/* Name + active checkmark */}

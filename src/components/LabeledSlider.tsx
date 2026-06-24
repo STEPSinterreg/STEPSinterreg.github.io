@@ -9,6 +9,7 @@ type Props = {
   onChange: (v: number) => void;
   unit?: string;
   showDirectionBars?: boolean;
+  directionBarLabel?: string;
 };
 
 export default function LabeledSlider({
@@ -22,6 +23,7 @@ export default function LabeledSlider({
   onChange,
   unit,
   showDirectionBars,
+  directionBarLabel,
 }: Props) {
   const v = typeof displayValue === "number" ? displayValue : value;
   const display = Number.isFinite(v) ? (Number.isInteger(v) ? String(v) : v.toFixed(1)) : "";
@@ -41,18 +43,30 @@ export default function LabeledSlider({
       </label>
 
       {showDirectionBars ? (
-        <div className="flex h-10 w-full items-end gap-1" aria-hidden="true">
-          {Array.from({ length: bars }).map((_, i) => (
-            <div
-              // eslint-disable-next-line react/no-array-index-key
-              key={i}
-              className={
-                "flex-1 rounded-sm " +
-                (i < activeBars ? "bg-steps-400/80" : "bg-surface-300/70")
-              }
-              style={{ height: `${25 + (i / Math.max(1, bars - 1)) * 75}%` }}
-            />
-          ))}
+        <div className="flex h-10 w-full items-end gap-1">
+          {Array.from({ length: bars }).map((_, i) => {
+            const midpoint = min + ((i + 0.5) / bars) * (max - min);
+            const isActive = i < activeBars;
+            return (
+              <button
+                key={i}
+                type="button"
+                aria-label={
+                  directionBarLabel
+                    ? `${directionBarLabel}: ${Math.round(midpoint)}${unit ? ` ${unit}` : ""}`
+                    : `${Math.round(midpoint)}${unit ? ` ${unit}` : ""}`
+                }
+                onClick={() => onChange(midpoint)}
+                className={
+                  "flex-1 rounded-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-50 " +
+                  (isActive
+                    ? "bg-steps-400/80 hover:bg-steps-500"
+                    : "bg-surface-300/70 hover:bg-surface-400")
+                }
+                style={{ height: `${25 + (i / Math.max(1, bars - 1)) * 75}%` }}
+              />
+            );
+          })}
         </div>
       ) : null}
 
