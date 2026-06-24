@@ -10,6 +10,7 @@ type Props = {
   unit?: string;
   showDirectionBars?: boolean;
   directionBarLabel?: string;
+  directionBarCount?: number;
 };
 
 export default function LabeledSlider({
@@ -24,10 +25,11 @@ export default function LabeledSlider({
   unit,
   showDirectionBars,
   directionBarLabel,
+  directionBarCount = 20,
 }: Props) {
   const v = typeof displayValue === "number" ? displayValue : value;
   const display = Number.isFinite(v) ? (Number.isInteger(v) ? String(v) : v.toFixed(1)) : "";
-  const bars = 20;
+  const bars = Math.max(1, Math.round(directionBarCount));
   const value01 = (() => {
     if (!Number.isFinite(value)) return 0;
     const denom = max - min;

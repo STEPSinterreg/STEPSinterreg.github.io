@@ -59,13 +59,23 @@ export default function AudioSpectrum({ analyser, width = 800, height = 120, mod
     const timeData = new Uint8Array(analyser.fftSize);
 
     const draw = () => {
-      const w = canvas.width;
-      const h = canvas.height;
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const cssW = Math.max(1, Math.round(canvas.clientWidth || width));
+      const cssH = Math.max(1, height);
+      const targetW = Math.round(cssW * dpr);
+      const targetH = Math.round(cssH * dpr);
+      if (canvas.width !== targetW || canvas.height !== targetH) {
+        canvas.width = targetW;
+        canvas.height = targetH;
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const w = cssW;
+      const h = cssH;
       const c = theme === 'dark' ? DARK : LIGHT;
-      const padLeft = mode === 'waveform' ? 8 : 44;
+      const padLeft = mode === 'waveform' ? 8 : 40;
       const padRight = mode === 'waveform' ? 8 : 12;
       const padTop = 8;
-      const padBottom = mode === 'waveform' ? 8 : 28;
+      const padBottom = mode === 'waveform' ? 8 : 30;
       const plotX = padLeft;
       const plotY = padTop;
       const plotW = Math.max(1, w - padLeft - padRight);
@@ -137,14 +147,19 @@ export default function AudioSpectrum({ analyser, width = 800, height = 120, mod
 
         const ticks = [250, 500, 1000, 2000, 4000, 8000].filter((hz) => hz <= maxHz);
         ctx.fillStyle = c.label;
-        ctx.font = '11px sans-serif';
+        ctx.font = '10px sans-serif';
         ctx.textBaseline = 'middle';
         ctx.textAlign = 'right';
-        ctx.fillText('100%', padLeft - 8, plotY + 2);
-        ctx.fillText('0%', padLeft - 8, plotBottom - 2);
+        ctx.fillText('100%', padLeft - 6, plotY + 2);
+        ctx.fillText('0%', padLeft - 6, plotBottom - 2);
+
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText(t['hearingLossExperience.spectrum.levelAxis'], plotX, plotY + 2);
 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
+        let lastLabelX = -Infinity;
         ticks.forEach((hz) => {
           const x = plotX + ((hz - minHz) / (maxHz - minHz)) * plotW;
           ctx.strokeStyle = c.grid;
@@ -152,18 +167,12 @@ export default function AudioSpectrum({ analyser, width = 800, height = 120, mod
           ctx.moveTo(x, plotY);
           ctx.lineTo(x, plotBottom);
           ctx.stroke();
-          ctx.fillStyle = c.label;
-          ctx.fillText(hz >= 1000 ? `${hz / 1000} kHz` : `${hz} Hz`, x, plotBottom + 6);
+          if (x - lastLabelX >= 48) {
+            ctx.fillStyle = c.label;
+            ctx.fillText(hz >= 1000 ? `${hz / 1000} kHz` : `${hz} Hz`, x, plotBottom + 7);
+            lastLabelX = x;
+          }
         });
-
-        ctx.save();
-        ctx.translate(12, plotY + plotH / 2);
-        ctx.rotate(-Math.PI / 2);
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = c.label;
-        ctx.fillText(t['hearingLossExperience.spectrum.levelAxis'], 0, 0);
-        ctx.restore();
 
         // Filled gradient area
         ctx.beginPath();
@@ -211,5 +220,5 @@ export default function AudioSpectrum({ analyser, width = 800, height = 120, mod
     };
   }, [analyser, mode, theme, t]);
 
-  return <canvas ref={canvasRef} width={width} height={height} className="w-full rounded-lg border border-surface-300" />;
+  return <canvas ref={canvasRef} width={width} height={height} style={{ height }} className="w-full rounded-lg border border-surface-300" />;
 }

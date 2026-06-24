@@ -237,11 +237,6 @@ export function HearingLossCompare() {
     <div className="space-y-5">
       {/* Hero */}
       <section className="overflow-hidden rounded-2xl border border-surface-300 bg-white shadow-sm">
-        <div className="border-b border-surface-300 bg-steps-50 px-6 py-3 dark:bg-steps-100">
-          <div className="text-xs font-semibold uppercase tracking-widest text-steps-600">
-            {t["hearingLossExperience.compare.tagline"]}
-          </div>
-        </div>
         <div className="p-6 sm:p-8">
           <h1 className="text-2xl font-semibold tracking-tight text-gray-800 sm:text-3xl">
             {t["hearingLossExperience.compare.title"]}
@@ -297,28 +292,11 @@ export function HearingLossCompare() {
                   <span>8 {t["common.khz"]}</span>
                 </div>
 
-                {/* Name + active checkmark */}
+                {/* Name */}
                 <div className="flex items-start justify-between gap-2">
                   <span className={`text-sm font-semibold leading-snug ${active ? "text-steps-700" : "text-gray-800"}`}>
                     {t[titleKey]}
                   </span>
-                  {active && (
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="mt-0.5 shrink-0 text-steps-500"
-                      aria-hidden="true"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="m9 12 2 2 4-4" />
-                    </svg>
-                  )}
                 </div>
 
                 {/* Short description */}

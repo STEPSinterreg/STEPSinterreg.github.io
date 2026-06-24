@@ -322,8 +322,14 @@ export const hearingLossProfileDefinitions: HearingLossProfileDefinition[] = [
     description: "Reduced low frequencies with better highs.",
     randomMode: "perLevel",
     filters: {
-      left: bandEqToFilterSpecs({ 250: -20, 500: -15, 1000: -8, 2000: 0, 3000: 0, 4000: 0, 6000: 0, 8000: 0 }),
-      right: bandEqToFilterSpecs({ 250: -20, 500: -15, 1000: -8, 2000: 0, 3000: 0, 4000: 0, 6000: 0, 8000: 0 }),
+      left: [
+        { type: "lowshelf", freqHz: 900, gainDb: -18, q: 0.7 },
+        ...bandEqToFilterSpecs({ 250: -18, 500: -14, 1000: -8, 2000: -3, 3000: 0, 4000: 0, 6000: 0, 8000: 0 }),
+      ],
+      right: [
+        { type: "lowshelf", freqHz: 900, gainDb: -18, q: 0.7 },
+        ...bandEqToFilterSpecs({ 250: -18, 500: -14, 1000: -8, 2000: -3, 3000: 0, 4000: 0, 6000: 0, 8000: 0 }),
+      ],
     },
   },
   {

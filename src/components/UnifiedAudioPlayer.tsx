@@ -351,7 +351,7 @@ export default function UnifiedAudioPlayer({
         <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">{soundLabel}</div>
         <div className="flex flex-wrap gap-2">
           {sounds.map((s) => {
-            const active = s.key === selectedKey;
+            const active = !microphoneActive && s.key === selectedKey;
             const played = playedKeys.has(s.key);
             return (
               <button

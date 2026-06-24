@@ -389,7 +389,7 @@ export default function HearingLoss() {
   const calibration = defaultCalibrationProfile;
   const [audiometry, setAudiometry] = useState<AudiometrySession>(() => createAudiometrySession(TEST_FREQUENCIES_HZ, calibration));
   const [freqIndex, setFreqIndex] = useState(0);
-  const [ear, setEar] = useState<Ear>("R");
+  const [ear, setEar] = useState<Ear>("L");
   const [sliderLevel, setSliderLevel] = useState<number>(() => clampLevel(LOUDNESS_START_LEVEL));
   const [sliderDbHlUi, setSliderDbHlUi] = useState<number>(() => dbHlFloatForLevel(clampLevel(LOUDNESS_START_LEVEL)));
   const [tonePlaying, setTonePlaying] = useState(false);
@@ -412,7 +412,7 @@ export default function HearingLoss() {
 
     setAudiometry(createAudiometrySession(TEST_FREQUENCIES_HZ, calibration));
     setFreqIndex(0);
-    setEar("R");
+    setEar("L");
     const start = clampLevel(LOUDNESS_START_LEVEL);
     setSliderLevel(start);
     sliderLevelRef.current = start;
@@ -432,7 +432,7 @@ export default function HearingLoss() {
     if (!saved) {
       setAudiometry(createAudiometrySession(TEST_FREQUENCIES_HZ, calibration));
       setFreqIndex(0);
-      setEar("R");
+      setEar("L");
       const start = clampLevel(LOUDNESS_START_LEVEL);
       setSliderLevel(start);
       sliderLevelRef.current = start;
@@ -462,10 +462,10 @@ export default function HearingLoss() {
   };
 
   const goToPreviousMeasurement = async () => {
-    if (ear === "R" && freqIndex === 0) return;
+    if (ear === "L" && freqIndex === 0) return;
 
-    const prevEar: Ear = ear === "L" ? "R" : "L";
-    const prevFreqIndex = ear === "L" ? freqIndex : Math.max(0, freqIndex - 1);
+    const prevEar: Ear = ear === "R" ? "L" : "R";
+    const prevFreqIndex = ear === "R" ? freqIndex : Math.max(0, freqIndex - 1);
     const prevFreq = TEST_FREQUENCIES_HZ[prevFreqIndex] ?? currentFreq;
 
     const frequencyWillChange = prevFreq !== currentFreq;
@@ -502,7 +502,7 @@ export default function HearingLoss() {
 
   const currentFreq = TEST_FREQUENCIES_HZ[freqIndex] ?? TEST_FREQUENCIES_HZ[0];
   const totalTestSteps = TEST_FREQUENCIES_HZ.length * 2;
-  const currentStep = freqIndex * 2 + (ear === "R" ? 1 : 2);
+  const currentStep = freqIndex * 2 + (ear === "L" ? 1 : 2);
   const progressNow = Math.min(currentStep, totalTestSteps);
   const progressPct = totalTestSteps > 0 ? (progressNow / totalTestSteps) * 100 : 0;
 
@@ -603,8 +603,8 @@ export default function HearingLoss() {
   }, [activeStage, muted, currentFreq, ear]);
 
   const advanceToNextMeasurement = async () => {
-    const nextEar: Ear = ear === "R" ? "L" : "R";
-    const nextFreqIndex = ear === "R" ? freqIndex : freqIndex + 1;
+    const nextEar: Ear = ear === "L" ? "R" : "L";
+    const nextFreqIndex = ear === "L" ? freqIndex : freqIndex + 1;
 
     const nextFreq = TEST_FREQUENCIES_HZ[nextFreqIndex] ?? currentFreq;
     const frequencyWillChange = nextFreq !== currentFreq;
@@ -1915,17 +1915,12 @@ export default function HearingLoss() {
                     </div>
 
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      <div>
-                        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                          {t["hearingLossExperience.test.currentEar"]}
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <EarSymbol side="R" active={ear === "R"} />
-                          <EarSymbol side="L" active={ear === "L"} />
-                        </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <EarSymbol side="L" active={ear === "L"} />
+                        <EarSymbol side="R" active={ear === "R"} />
                       </div>
 
-                      <div className="rounded-xl border border-surface-300 bg-surface-50 p-4">
+                      <div className="flex min-h-24 flex-col justify-center rounded-xl border border-surface-300 bg-surface-50 p-4">
                         <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">
                           {t["hearingLossExperience.test.currentFreq"]}
                         </div>
@@ -1937,6 +1932,14 @@ export default function HearingLoss() {
 
                     <div className="text-sm text-gray-500">{t["hearingLossExperience.test.body"]}</div>
                   </div>
+
+                  <details className="rounded-xl border border-surface-300 bg-surface-50 p-4">
+                    <summary className="cursor-pointer text-sm font-medium text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100">
+                      {t["hearingLossExperience.guide.title"]}
+                    </summary>
+                    <div className="mt-3 text-sm text-gray-500">{t["hearingLossExperience.guide.scale"]}</div>
+                    <div className="mt-2 text-sm text-gray-500">{t["hearingLossExperience.guide.testTips"]}</div>
+                  </details>
 
                   <CalibrationNotice />
 
@@ -1950,6 +1953,7 @@ export default function HearingLoss() {
                       displayValue={Math.round(sliderDbHlUi)}
                       unit={t["hearingLossExperience.test.dbhlUnit"]}
                       showDirectionBars
+                      directionBarCount={26}
                       directionBarLabel={t["hearingLossExperience.test.directionBarLabel"]}
                       onChange={(v) => {
                         setSliderDbHlUi(v);
@@ -2004,11 +2008,11 @@ export default function HearingLoss() {
                     <button
                       type="button"
                       onClick={goToPreviousMeasurement}
-                      disabled={ear === "R" && freqIndex === 0}
-                      aria-disabled={ear === "R" && freqIndex === 0}
+                      disabled={ear === "L" && freqIndex === 0}
+                      aria-disabled={ear === "L" && freqIndex === 0}
                       className={
                         "rounded-lg border border-surface-300 px-3 py-2 text-sm hover:bg-surface-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100 " +
-                        (ear === "R" && freqIndex === 0 ? "cursor-not-allowed opacity-60" : "")
+                        (ear === "L" && freqIndex === 0 ? "cursor-not-allowed opacity-60" : "")
                       }
                     >
                       {t["hearingLossExperience.test.previous"]}
@@ -2054,13 +2058,6 @@ export default function HearingLoss() {
 
                   {toneError && <div className="text-sm text-amber-600">{toneError}</div>}
 
-                  <details className="rounded-xl border border-surface-300 bg-surface-50 p-4">
-                    <summary className="cursor-pointer text-sm font-medium text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steps-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-100">
-                      {t["hearingLossExperience.guide.title"]}
-                    </summary>
-                    <div className="mt-3 text-sm text-gray-500">{t["hearingLossExperience.guide.scale"]}</div>
-                    <div className="mt-2 text-sm text-gray-500">{t["hearingLossExperience.guide.testTips"]}</div>
-                  </details>
                 </div>
 
                 <div className="sticky bottom-0 rounded-b-2xl border-t border-surface-300 bg-surface-50 px-5 py-4 sm:px-6 sm:py-5">
